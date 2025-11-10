@@ -1,0 +1,9 @@
+
+.env
+.env.local
+.venv
+.pytest_cache
+__pycache__
+*.db
+*.db-journal
+cartup_agent/database/data/
