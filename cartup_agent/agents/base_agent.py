@@ -37,7 +37,7 @@ class BaseAgent(Agent):
             truncated_chat_ctx = userdata.prev_agent.chat_ctx.copy(
                 exclude_instructions=True,
                 exclude_function_call=False
-            ).truncate(max_items=6)
+            ).truncate(max_items=20)
             
             existing_ids = {item.id for item in chat_ctx.items}
             items_copy = [
@@ -84,10 +84,8 @@ class BaseAgent(Agent):
             await self._generate_transfer_greeting()
     
     async def _generate_transfer_greeting(self) -> None:
-        """Generate a greeting when agent is transferred. Override in subclasses for custom greetings."""
-        await self.session.generate_reply(
-            instructions="Greet the user briefly and let them know you're here to help with their request. Be friendly and concise."
-        )
+        """No-op transfer greeting to avoid duplicate turns; the target agent's on_enter will greet."""
+        return
     
     def _get_tts_for_language(self, language: str):
         """Helper method to get TTS instance for a given language."""
@@ -102,5 +100,6 @@ class BaseAgent(Agent):
         next_agent = userdata.agents[name]
         userdata.prev_agent = current_agent
         
+        # Announce transfer before handing off to the target agent.
         return next_agent, f"Transferring to {name}."
 

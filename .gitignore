@@ -7,3 +7,12 @@ __pycache__
 *.db
 *.db-journal
 cartup_agent/database/data/
+speechtotext2.json
+
+# Frontend (agent-starter-react)
+agent-starter-react/node_modules/
+agent-starter-react/.next/
+agent-starter-react/out/
+agent-starter-react/build/
+agent-starter-react/.env.local
+agent-starter-react/.env*.local

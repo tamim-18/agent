@@ -1,0 +1,11 @@
+<svg width="140" height="36" viewBox="0 0 140 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shopping bag icon with handle -->
+  <path d="M8 10C8 8.89543 8.89543 8 10 8H12C13.1046 8 14 8.89543 14 10V12H8V10Z" fill="#FF69B4"/>
+  <path d="M6 12H16L15.5 22C15.5 22.8284 14.8284 23.5 14 23.5H8C7.17157 23.5 6.5 22.8284 6.5 22L6 12Z" fill="none" stroke="#FF69B4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M9 12V9C9 7.34315 10.3431 6 12 6H12.3C13.9569 6 15.3 7.34315 15.3 9V12" stroke="#FF69B4" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Inner L shape/layer -->
+  <path d="M9.5 16.5H12.5V19.5H9.5V16.5Z" fill="#FF69B4" opacity="0.35"/>
+  
+  <!-- cartup text -->
+  <text x="24" y="20" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#1FD5F9" letter-spacing="-0.5">cartup</text>
+</svg>

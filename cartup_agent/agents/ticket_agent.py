@@ -3,7 +3,7 @@ Support ticket agent - creates and tracks support tickets
 """
 
 from livekit.agents.llm import function_tool
-from livekit.plugins import google
+from livekit.plugins import google, openai
 
 from .base_agent import BaseAgent
 from ..session.user_data import RunContext_T
@@ -18,14 +18,23 @@ class TicketAgent(BaseAgent):
         super().__init__(
             instructions=(
                 "You create and track support tickets for orders (missing, damaged, wrong item, etc.).\n"
+                "Before asking for user_id or order_id, FIRST check the session summary (userdata) and last tool results. "
+                "If they are already present, do not re-ask and proceed.\n"
                 "Ask for order_id, issue description; create ticket; return ticket_id and status.\n"
                 "If the user wants to check orders, process returns, or get recommendations, transfer to the appropriate agent.\n"
                 "IMPORTANT: Always respond in the user's selected language. Check userdata.language for the current language preference. "
                 "If language is 'bn-BD', respond in Bangladesh Bengali with authentic Bangladesh accent, pronunciation, and cultural context. "
                 "If 'en-IN', respond in English."
             ),
-            tools=[set_current_order, to_greeter, create_ticket, track_ticket, get_ticket_status],
-            tts=google.TTS(voice_name="en-US-Chirp-HD-F", language="en-US"),  # Will be overridden by BaseAgent based on language
+            tools=[
+                set_current_order,
+                to_greeter,
+                create_ticket,
+                track_ticket,
+                get_ticket_status,
+            ],
+            llm=openai.LLM(model="gpt-4o-mini"),
+            tts=google.TTS(voice_name="en-IN-Chirp-HD-F", language="en-IN"),  # Align with other agents' English TTS
         )
     
     @function_tool()

@@ -3,7 +3,7 @@ Configuration module for CartUp voice agent
 Contains voice IDs, model configuration, and agent settings
 """
 
-from livekit.plugins import google, silero
+from livekit.plugins import google, openai, silero
 
 # Supported languages
 SUPPORTED_LANGUAGES = ["en-IN", "bn-BD"]  # bn-BD for Bangladesh Bengali accent
@@ -35,7 +35,7 @@ def get_voice_pipeline():
     """Returns configured voice pipeline components."""
     return {
         "stt": google.STT(),
-        "llm": google.LLM(model="gemini-2.0-flash"),
+        "llm": openai.LLM(model="gpt-4o-mini"),
         "tts": google.TTS(voice_name="en-IN-Chirp-HD-F", language="en-IN"),
         "vad": silero.VAD.load(),
     }

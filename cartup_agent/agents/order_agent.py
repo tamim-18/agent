@@ -3,7 +3,7 @@ Order management agent - handles order queries and updates
 """
 
 from livekit.agents.llm import function_tool
-from livekit.plugins import google
+from livekit.plugins import google, openai
 
 from .base_agent import BaseAgent
 from ..session.user_data import RunContext_T
@@ -18,13 +18,22 @@ class OrderAgent(BaseAgent):
         super().__init__(
             instructions=(
                 "You handle order queries: status, items, amount, ETA, address updates.\n"
+                "Before asking for user_id or order_id, FIRST check the session summary (userdata) and last tool results. "
+                "If they are already present, do not re-ask and proceed.\n"
                 "If user_id or order_id is missing, politely ask and then call tools.\n"
                 "If the user wants to create tickets, process returns, or get recommendations, transfer to the appropriate agent.\n"
                 "IMPORTANT: Always respond in the user's selected language. Check userdata.language for the current language preference. "
                 "If language is 'bn-BD', respond in Bangladesh Bengali with authentic Bangladesh accent, pronunciation, and cultural context. "
                 "If 'en-IN', respond in English."
             ),
-            tools=[set_current_order, to_greeter, get_order_details, get_user_orders, update_delivery_address],
+            tools=[
+                set_current_order,
+                to_greeter,
+                get_order_details,
+                get_user_orders,
+                update_delivery_address,
+            ],
+            llm=openai.LLM(model="gpt-4o-mini"),
             tts=google.TTS(voice_name="en-IN-Chirp-HD-D", language="en-IN"),  # Will be overridden by BaseAgent based on language
         )
     

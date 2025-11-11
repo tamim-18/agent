@@ -3,7 +3,7 @@ Product recommendation agent - provides personalized recommendations
 """
 
 from livekit.agents.llm import function_tool
-from livekit.plugins import google
+from livekit.plugins import google, openai
 
 from .base_agent import BaseAgent
 from ..session.user_data import RunContext_T
@@ -19,15 +19,24 @@ class RecommendAgent(BaseAgent):
             instructions=(
                 "You provide simple personalized recommendations using a dummy profile list. "
                 "Ask for user_id if missing. Offer to add to wishlist (simulated). "
+                "Before asking for user_id or order_id, FIRST check the session summary (userdata) and last tool results. "
+                "If they are already present, do not re-ask and proceed.\n"
                 "If the user wants to check orders, create tickets, or process returns, transfer to the appropriate agent.\n"
                 "IMPORTANT: Always respond in the user's selected language. Check userdata.language for the current language preference. "
                 "If language is 'bn-BD', respond in Bangladesh Bengali with authentic Bangladesh accent, pronunciation, and cultural context. "
                 "If 'en-IN', respond in English."
             ),
-            tools=[set_user, to_greeter, get_recommendations, get_product_details, add_to_wishlist],
+            tools=[
+                set_user,
+                to_greeter,
+                get_recommendations,
+                get_product_details,
+                add_to_wishlist,
+            ],
+            llm=openai.LLM(model="gpt-4o-mini"),
             # Use a different Bengali voice optimized for recommendations (warmer, friendlier tone)
             # Trying "Aoede" voice which may sound better for product recommendations
-            tts=google.TTS(voice_name="bn-BD-Chirp3-HD-Aoede", language="bn-BD"),
+            tts=google.TTS(voice_name="bn-IN-Chirp3-HD-Pulcherrima", language="bn-IN"),
         )
     
     @function_tool()

@@ -3,7 +3,7 @@ Return and refund agent - handles returns and refunds
 """
 
 from livekit.agents.llm import function_tool
-from livekit.plugins import google
+from livekit.plugins import google, openai
 
 from .base_agent import BaseAgent
 from ..session.user_data import RunContext_T
@@ -19,12 +19,21 @@ class ReturnAgent(BaseAgent):
             instructions=(
                 "You manage returns and refunds. Ask for order_id; mark a return as initiated; "
                 "report return and refund status.\n"
+                "Before asking for user_id or order_id, FIRST check the session summary (userdata) and last tool results. "
+                "If they are already present, do not re-ask and proceed.\n"
                 "If the user wants to check orders, create tickets, or get recommendations, transfer to the appropriate agent.\n"
                 "IMPORTANT: Always respond in the user's selected language. Check userdata.language for the current language preference. "
                 "If language is 'bn-BD', respond in Bangladesh Bengali with authentic Bangladesh accent, pronunciation, and cultural context. "
                 "If 'en-IN', respond in English."
             ),
-            tools=[set_current_order, to_greeter, initiate_return, get_return_status, update_refund_status],
+            tools=[
+                set_current_order,
+                to_greeter,
+                initiate_return,
+                get_return_status,
+                update_refund_status,
+            ],
+            llm=openai.LLM(model="gpt-4o-mini"),
             tts=google.TTS(voice_name="en-US-Chirp-HD-D", language="en-US"),  # Will be overridden by BaseAgent based on language
         )
     

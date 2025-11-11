@@ -3,7 +3,7 @@ Greeter agent - initial point of contact and routing agent
 """
 
 from livekit.agents.llm import function_tool
-from livekit.plugins import google
+from livekit.plugins import google, openai
 
 from .base_agent import BaseAgent
 from ..session.user_data import RunContext_T
@@ -29,7 +29,7 @@ class GreeterAgent(BaseAgent):
                 "If 'en-IN', respond in English."
             ),
             tools=[set_user, set_current_order, set_language],
-            llm=google.LLM(model="gemini-2.0-flash"),
+            llm=openai.LLM(model="gpt-4o-mini"),
             tts=google.TTS(voice_name="en-IN-Chirp-HD-F", language="en-IN"),
         )
     

@@ -10,7 +10,7 @@ import logging
 from livekit import agents
 from livekit.agents import JobContext, WorkerOptions, cli
 from livekit.agents.voice import AgentSession
-from livekit.plugins import google, silero, noise_cancellation
+from livekit.plugins import google, openai, silero, noise_cancellation
 from livekit.agents import RoomInputOptions
 from .database.db import init_database
 from .session.user_data import UserData
@@ -62,7 +62,7 @@ async def entrypoint(ctx: JobContext):
             languages=["bn-BD"],  # Bangladesh Bengali - primary language for STT
             detect_language=True,  # Enable auto-detection (may help with English too)
         ),
-        llm=google.LLM(model="gemini-2.0-flash"),
+        llm=openai.LLM(model="gpt-4o-mini"),
         tts=google.TTS(voice_name="en-IN-Chirp-HD-F", language="en-IN"),  # Default, will be overridden per agent
         vad=silero.VAD.load(),
         max_tool_steps=5,
