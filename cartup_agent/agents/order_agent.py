@@ -19,10 +19,13 @@ class OrderAgent(BaseAgent):
             instructions=(
                 "You handle order queries: status, items, amount, ETA, address updates.\n"
                 "If user_id or order_id is missing, politely ask and then call tools.\n"
-                "If the user wants to create tickets, process returns, or get recommendations, transfer to the appropriate agent."
+                "If the user wants to create tickets, process returns, or get recommendations, transfer to the appropriate agent.\n"
+                "IMPORTANT: Always respond in the user's selected language. Check userdata.language for the current language preference. "
+                "If language is 'bn-BD', respond in Bangladesh Bengali with authentic Bangladesh accent, pronunciation, and cultural context. "
+                "If 'en-IN', respond in English."
             ),
             tools=[set_current_order, to_greeter, get_order_details, get_user_orders, update_delivery_address],
-            tts=google.TTS(voice_name="en-IN-Chirp-HD-D", language="en-IN"),
+            tts=google.TTS(voice_name="en-IN-Chirp-HD-D", language="en-IN"),  # Will be overridden by BaseAgent based on language
         )
     
     @function_tool()

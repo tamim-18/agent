@@ -8,6 +8,7 @@ from typing import Tuple
 from livekit.agents.voice import Agent
 
 from ..session.user_data import UserData, RunContext_T
+from ..config import get_tts_for_language
 
 logger = logging.getLogger("cartup-agent")
 
@@ -23,6 +24,14 @@ class BaseAgent(Agent):
         userdata: UserData = self.session.userdata
         chat_ctx = self.chat_ctx.copy()
         
+        # Get language preference (default to English if not set)
+        language = userdata.language or "en-IN"
+        
+        # Note: Agent's TTS is read-only and set during initialization.
+        # The session-level TTS will be used, and we configure language-aware TTS
+        # by ensuring the agent's instructions include language context.
+        # For future enhancement, we could update session.tts if supported.
+        
         # Copy truncated chat history from previous agent
         if isinstance(userdata.prev_agent, Agent):
             truncated_chat_ctx = userdata.prev_agent.chat_ctx.copy(
@@ -37,10 +46,28 @@ class BaseAgent(Agent):
             ]
             chat_ctx.items.extend(items_copy)
         
-        # Inject live summary for fast grounding
+        # Inject live summary for fast grounding with language context
+        if language == "bn-BD":
+            lang_name = "Bengali (Bangladesh)"
+            lang_instructions = (
+                f"IMPORTANT: Respond in Bengali with Bangladesh accent and cultural context ({language}). "
+                f"The user has selected Bangladesh Bengali as their preferred language. "
+                f"Use Bangladesh Bengali pronunciation, vocabulary, and cultural references. "
+                f"All your responses must be in Bangladesh Bengali with authentic Bangladesh accent."
+            )
+        else:
+            lang_name = "English"
+            lang_instructions = (
+                f"IMPORTANT: Respond in {lang_name} ({language}). The user has selected {lang_name} as their preferred language. "
+                f"All your responses must be in {lang_name}."
+            )
+        
         chat_ctx.add_message(
             role="system",
-            content=f"You are {agent_name}. Current session summary:\n{userdata.summarize()}",
+            content=(
+                f"You are {agent_name}. Current session summary:\n{userdata.summarize()}\n\n"
+                f"{lang_instructions}"
+            ),
         )
         
         await self.update_chat_ctx(chat_ctx)
@@ -48,8 +75,9 @@ class BaseAgent(Agent):
         # Generate greeting for all agents
         if userdata.prev_agent is None:
             # Initial greeting for first agent (GreeterAgent)
+            # GreeterAgent will handle language selection via its instructions
             await self.session.generate_reply(
-                instructions="Greet the user warmly and ask how you can help."
+                instructions="Greet the user warmly. First check if language is set. If not, offer language selection between English and Bengali. Then ask how you can help."
             )
         else:
             # Default greeting for transferred agents (can be overridden)
@@ -60,6 +88,10 @@ class BaseAgent(Agent):
         await self.session.generate_reply(
             instructions="Greet the user briefly and let them know you're here to help with their request. Be friendly and concise."
         )
+    
+    def _get_tts_for_language(self, language: str):
+        """Helper method to get TTS instance for a given language."""
+        return get_tts_for_language(language)
     
     async def _transfer_to_agent(
         self, name: str, context: RunContext_T

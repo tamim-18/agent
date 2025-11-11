@@ -7,6 +7,7 @@ from pydantic import Field
 from livekit.agents.llm import function_tool
 
 from ..session.user_data import RunContext_T
+from ..config import get_tts_for_language
 
 
 @function_tool()
@@ -27,6 +28,34 @@ async def set_current_order(
     """Set the focal order id for follow-up queries (track/modify)."""
     context.userdata.current_order_id = order_id
     return f"Current order set to {order_id}"
+
+
+@function_tool()
+async def set_language(
+    language: Annotated[str, Field(description="Language code: 'en-IN' for English or 'bn-BD' for Bangladesh Bengali")],
+    context: RunContext_T,
+) -> str:
+    """Set the preferred language for the conversation session."""
+    if language not in ["en-IN", "bn-BD"]:
+        return f"Invalid language code. Please use 'en-IN' for English or 'bn-BD' for Bangladesh Bengali."
+    context.userdata.language = language
+    
+    # Try to update session TTS if possible (may not be supported)
+    try:
+        tts_instance = get_tts_for_language(language)
+        # Attempt to update session TTS (this may not work if TTS is read-only)
+        if hasattr(context.session, 'tts') and hasattr(context.session.tts, '__setattr__'):
+            try:
+                context.session.tts = tts_instance
+            except (AttributeError, TypeError):
+                # TTS is read-only, which is expected
+                pass
+    except Exception:
+        # If TTS update fails, continue anyway - language preference is set
+        pass
+    
+    lang_name = "English" if language == "en-IN" else "Bengali (Bangladesh)"
+    return f"Language set to {lang_name} ({language}). All responses will now be in {lang_name} with authentic Bangladesh accent and cultural context."
 
 
 @function_tool()

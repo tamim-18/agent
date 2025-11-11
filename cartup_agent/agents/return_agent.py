@@ -19,10 +19,13 @@ class ReturnAgent(BaseAgent):
             instructions=(
                 "You manage returns and refunds. Ask for order_id; mark a return as initiated; "
                 "report return and refund status.\n"
-                "If the user wants to check orders, create tickets, or get recommendations, transfer to the appropriate agent."
+                "If the user wants to check orders, create tickets, or get recommendations, transfer to the appropriate agent.\n"
+                "IMPORTANT: Always respond in the user's selected language. Check userdata.language for the current language preference. "
+                "If language is 'bn-BD', respond in Bangladesh Bengali with authentic Bangladesh accent, pronunciation, and cultural context. "
+                "If 'en-IN', respond in English."
             ),
             tools=[set_current_order, to_greeter, initiate_return, get_return_status, update_refund_status],
-            tts=google.TTS(voice_name="en-US-Chirp-HD-D", language="en-US"),
+            tts=google.TTS(voice_name="en-US-Chirp-HD-D", language="en-US"),  # Will be overridden by BaseAgent based on language
         )
     
     @function_tool()

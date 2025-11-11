@@ -45,12 +45,25 @@ async def entrypoint(ctx: JobContext):
     })
     logger.info("All agents instantiated")
     
-    # Configure voice pipeline (matching livekit_basic_agent.py)
+    # Configure voice pipeline
+    # STT is configured to support both English and Bengali using the 'chirp_2' model
+    # CRITICAL: Multiple language recognition (specifying both en-IN and bn-IN) is ONLY
+    # available in locations: 'eu', 'global', or 'us'. Using 'global' location.
+    # Note: If chirp_2 is not available in 'global', we may need to use a different approach.
+    # TTS will be dynamically configured per agent based on user's language preference.
     session = AgentSession[UserData](
         userdata=userdata,
-        stt=google.STT(),
+        stt=google.STT(
+            # Use chirp_2 with Bengali in asia-northeast1 (where it's available)
+            # Note: Multiple languages not supported in asia-northeast1, so using Bengali only
+            # The greeter will handle English responses initially via LLM
+            model="chirp_2",  # chirp_2 model supports Bengali (bn-BD for Bangladesh)
+            location="asia-northeast1",  # Required location for chirp_2 with Bengali support
+            languages=["bn-BD"],  # Bangladesh Bengali - primary language for STT
+            detect_language=True,  # Enable auto-detection (may help with English too)
+        ),
         llm=google.LLM(model="gemini-2.0-flash"),
-        tts=google.TTS(voice_name="en-IN-Chirp-HD-F", language="en-IN"),
+        tts=google.TTS(voice_name="en-IN-Chirp-HD-F", language="en-IN"),  # Default, will be overridden per agent
         vad=silero.VAD.load(),
         max_tool_steps=5,
     )

@@ -7,7 +7,7 @@ from livekit.plugins import google
 
 from .base_agent import BaseAgent
 from ..session.user_data import RunContext_T
-from ..tools.common_tools import set_user, set_current_order
+from ..tools.common_tools import set_user, set_current_order, set_language
 
 
 class GreeterAgent(BaseAgent):
@@ -17,12 +17,18 @@ class GreeterAgent(BaseAgent):
         super().__init__(
             instructions=(
                 "You are CartUp's friendly voice assistant.\n"
-                "Your job is to greet the caller, figure out what they need, and route them.\n"
+                "FIRST, check if the user has selected a language preference (check userdata.language). "
+                "If no language is set, you MUST offer language selection: 'Would you like to continue in English or Bengali? Please say English or Bengali.' "
+                "When the user responds with their choice, call the set_language tool with 'en-IN' for English or 'bn-BD' for Bangladesh Bengali.\n"
+                "After language is selected, greet the caller warmly in the selected language and figure out what they need, then route them.\n"
                 "If they want: order tracking/modification ⇒ OrderAgent; issue/ticket ⇒ TicketAgent; "
                 "returns/refunds ⇒ ReturnAgent; recommendations ⇒ RecommendAgent.\n"
-                "Ask for user_id or order_id when needed and call the appropriate tools."
+                "Ask for user_id or order_id when needed and call the appropriate tools.\n"
+                "Always respond in the user's selected language. "
+                "If language is 'bn-BD', respond in Bangladesh Bengali with authentic Bangladesh accent, pronunciation, and cultural context. "
+                "If 'en-IN', respond in English."
             ),
-            tools=[set_user, set_current_order],
+            tools=[set_user, set_current_order, set_language],
             llm=google.LLM(model="gemini-2.0-flash"),
             tts=google.TTS(voice_name="en-IN-Chirp-HD-F", language="en-IN"),
         )
@@ -46,4 +52,19 @@ class GreeterAgent(BaseAgent):
     async def to_recommend(self, context: RunContext_T):
         """Transfer to RecommendAgent for product recommendations."""
         return await self._transfer_to_agent("recommend", context)
+    
+    async def _generate_transfer_greeting(self) -> None:
+        """Generate a greeting when GreeterAgent becomes active after transfer."""
+        userdata = self.session.userdata
+        if not userdata.language:
+            # If language not set, prompt for selection
+            await self.session.generate_reply(
+                instructions="Welcome back! Would you like to continue in English or Bengali? Please say 'English' or 'Bengali'."
+            )
+        else:
+            # Language is set, greet normally
+            lang_name = "English" if userdata.language == "en-IN" else "Bengali (Bangladesh)"
+            await self.session.generate_reply(
+                instructions=f"Welcome back! How can I help you today? (Responding in {lang_name})"
+            )
 

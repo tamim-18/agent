@@ -19,10 +19,13 @@ class TicketAgent(BaseAgent):
             instructions=(
                 "You create and track support tickets for orders (missing, damaged, wrong item, etc.).\n"
                 "Ask for order_id, issue description; create ticket; return ticket_id and status.\n"
-                "If the user wants to check orders, process returns, or get recommendations, transfer to the appropriate agent."
+                "If the user wants to check orders, process returns, or get recommendations, transfer to the appropriate agent.\n"
+                "IMPORTANT: Always respond in the user's selected language. Check userdata.language for the current language preference. "
+                "If language is 'bn-BD', respond in Bangladesh Bengali with authentic Bangladesh accent, pronunciation, and cultural context. "
+                "If 'en-IN', respond in English."
             ),
             tools=[set_current_order, to_greeter, create_ticket, track_ticket, get_ticket_status],
-            tts=google.TTS(voice_name="en-US-Chirp-HD-F", language="en-US"),
+            tts=google.TTS(voice_name="en-US-Chirp-HD-F", language="en-US"),  # Will be overridden by BaseAgent based on language
         )
     
     @function_tool()

@@ -19,10 +19,15 @@ class RecommendAgent(BaseAgent):
             instructions=(
                 "You provide simple personalized recommendations using a dummy profile list. "
                 "Ask for user_id if missing. Offer to add to wishlist (simulated). "
-                "If the user wants to check orders, create tickets, or process returns, transfer to the appropriate agent."
+                "If the user wants to check orders, create tickets, or process returns, transfer to the appropriate agent.\n"
+                "IMPORTANT: Always respond in the user's selected language. Check userdata.language for the current language preference. "
+                "If language is 'bn-BD', respond in Bangladesh Bengali with authentic Bangladesh accent, pronunciation, and cultural context. "
+                "If 'en-IN', respond in English."
             ),
             tools=[set_user, to_greeter, get_recommendations, get_product_details, add_to_wishlist],
-            tts=google.TTS(voice_name="en-AU-Chirp-HD-F", language="en-AU"),
+            # Use a different Bengali voice optimized for recommendations (warmer, friendlier tone)
+            # Trying "Aoede" voice which may sound better for product recommendations
+            tts=google.TTS(voice_name="bn-BD-Chirp3-HD-Aoede", language="bn-BD"),
         )
     
     @function_tool()
