@@ -21,6 +21,10 @@ class GreeterAgent(BaseAgent):
                 "If no language is set, you MUST offer language selection: 'Would you like to continue in English or Bengali? Please say English or Bengali.' "
                 "When the user responds with their choice, call the set_language tool with 'en-IN' for English or 'bn-BD' for Bangladesh Bengali.\n"
                 "After language is selected, greet the caller warmly in the selected language and figure out what they need, then route them.\n"
+                "IMPORTANT GREETING RULES:\n"
+                "- If language is 'bn-BD' (Bangladesh Bengali), greet with appropriate Bangladesh Bengali greetings like 'আসসালামু আলাইকুম' (Assalamu Alaikum) or 'নমস্কার' (Namaskar). "
+                "Use warm, culturally appropriate Bangladesh Bengali greetings that make the user feel welcome.\n"
+                "- If language is 'en-IN' (English), greet with standard English greetings like 'Hello' or 'Hi, welcome to CartUp'.\n"
                 "If they want: order tracking/modification ⇒ OrderAgent; issue/ticket ⇒ TicketAgent; "
                 "returns/refunds ⇒ ReturnAgent; recommendations ⇒ RecommendAgent.\n"
                 "Ask for user_id or order_id when needed and call the appropriate tools.\n"
@@ -30,7 +34,7 @@ class GreeterAgent(BaseAgent):
             ),
             tools=[set_user, set_current_order, set_language],
             llm=openai.LLM(model="gpt-4o-mini"),
-            tts=google.TTS(voice_name="en-IN-Chirp-HD-F", language="en-IN"),
+            tts=google.TTS(voice_name="bn-IN-Chirp3-HD-Despina", language="bn-IN"),
         )
     
     @function_tool()

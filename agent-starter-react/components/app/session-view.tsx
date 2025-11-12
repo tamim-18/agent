@@ -104,7 +104,7 @@ export const SessionView = ({
           <ChatTranscript
             hidden={!chatOpen}
             messages={messages}
-            className="mx-auto max-w-2xl space-y-3 transition-opacity duration-300 ease-out"
+            className="mx-auto max-w-3xl transition-opacity duration-300 ease-out"
           />
         </ScrollArea>
       </div>

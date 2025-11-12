@@ -11,13 +11,19 @@ SUPPORTED_LANGUAGES = ["en-IN", "bn-BD"]  # bn-BD for Bangladesh Bengali accent
 # TTS voice configuration per language
 ENGLISH_TTS_VOICE = "en-IN-Chirp-HD-F"
 
-# Bengali TTS voices for Bangladesh (bn-BD) - try different ones for better accent
-# Note: Using Bangladesh Bengali (bn-BD) for authentic Bangladesh accent
-# Available options include (same voice names, but use bn-BD language code):
-# FEMALE: Achernar, Aoede, Autonoe, Callirrhoe, Despina, Erinome, Gacrux, Kore, Laomedeia, Leda, Pulcherrima, Sulafat, Vindemiatrix, Zephyr
-# MALE: Achird, Algenib, Algieba, Alnilam, Charon, Enceladus, Fenrir, Iapetus, Orus, Puck, Rasalgethi, Sadachbia, Sadaltager, Schedar, Umbriel, Zubenelgenubi
-# Currently using: Achernar (FEMALE) with bn-BD for Bangladesh accent
-BENGALI_TTS_VOICE = "bn-BD-Chirp3-HD-Achernar"  # Bangladesh Bengali accent
+# Bengali TTS voices - using selected premium voices from Google Cloud TTS
+# Selected voices from Google Cloud TTS Premium models (Bengali India):
+# FEMALE: Despina (bn-IN-Chirp3-HD-Despina)
+# MALE: Alnilam, Rasalgethi (bn-IN-Chirp3-HD-Alnilam, bn-IN-Chirp3-HD-Rasalgethi)
+# Note: Using bn-IN voices but maintaining Bangladesh Bengali accent via LLM instructions
+# Default female voice for general use
+BENGALI_TTS_VOICE_FEMALE = "bn-IN-Chirp3-HD-Despina"  # Bengali India - Female
+# Default male voice for general use
+BENGALI_TTS_VOICE_MALE = "bn-IN-Chirp3-HD-Rasalgethi"  # Bengali India - Male
+# Alternative male voice
+BENGALI_TTS_VOICE_MALE_ALT = "bn-IN-Chirp3-HD-Alnilam"  # Bengali India - Male (Alternative)
+# Default voice (female)
+BENGALI_TTS_VOICE = BENGALI_TTS_VOICE_FEMALE  # Default to female voice
 
 # Voice configuration for different agents
 # Note: Using Google TTS with en-IN-Chirp-HD-F voice (Indian English, Chirp HD, Female)
@@ -47,20 +53,27 @@ AGENT_CONFIG = {
 }
 
 
-def get_tts_for_language(language: str, voice_name: str = None):
+def get_tts_for_language(language: str, voice_name: str = None, gender: str = "female"):
     """
     Returns appropriate TTS instance based on language preference.
     
     Args:
         language: Language code ("en-IN" or "bn-BD" for Bangladesh Bengali)
-        voice_name: Optional specific voice name to use (overrides default)
+        voice_name: Optional specific voice name to use (overrides default and gender)
+        gender: Gender preference ("male" or "female") - only used for Bengali if voice_name not provided
     
     Returns:
         Google TTS instance configured for the specified language
     """
     if language == "bn-BD":
-        voice = voice_name or BENGALI_TTS_VOICE
-        return google.TTS(voice_name=voice, language="bn-BD")
+        if voice_name:
+            voice = voice_name
+        elif gender == "male":
+            voice = BENGALI_TTS_VOICE_MALE
+        else:
+            voice = BENGALI_TTS_VOICE_FEMALE
+        # Use bn-IN language code for TTS (voices are bn-IN), but accent comes from LLM instructions
+        return google.TTS(voice_name=voice, language="bn-IN")
     else:
         # Default to English
         voice = voice_name or ENGLISH_TTS_VOICE

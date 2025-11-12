@@ -5,10 +5,10 @@ Order management agent - handles order queries and updates
 from livekit.agents.llm import function_tool
 from livekit.plugins import google, openai
 
-from .base_agent import BaseAgent
+from .base_agent import BaseAgent    
 from ..session.user_data import RunContext_T
-from ..tools.common_tools import set_current_order, to_greeter
-from ..tools.order_tools import get_order_details, get_user_orders, update_delivery_address
+from ..tools.common_tools import set_current_order, to_greeter  
+from ..tools.order_tools import get_order_details, get_user_orders, update_delivery_address  
 
 
 class OrderAgent(BaseAgent):
@@ -30,7 +30,12 @@ class OrderAgent(BaseAgent):
                 "- Make it sound like you're personally helping the customer, not reading from a database.\n"
                 "IMPORTANT: Always respond in the user's selected language. Check userdata.language for the current language preference. "
                 "If language is 'bn-BD', respond in Bangladesh Bengali with authentic Bangladesh accent, pronunciation, and cultural context. "
-                "If 'en-IN', respond in English."
+                "If 'en-IN', respond in English.\n"
+                "BENGALI EXAMPLES (when language is 'bn-BD'):\n"
+                "- Instead of 'order_id: o302, status: Pending', say 'আপনার o302 নম্বর অর্ডারটি এখনো প্রক্রিয়াধীন আছে' or 'আপনার অর্ডার প্রস্তুত হচ্ছে'.\n"
+                "- For amounts: 'মোট পাঁচ হাজার টাকা' or 'আপনার অর্ডারের পরিমাণ আড়াই হাজার টাকা'.\n"
+                "- For items: 'আপনি একটি ল্যাপটপ এবং দুটি মাউস অর্ডার করেছেন' or 'আপনার অর্ডারে তিনটি আইটেম আছে'.\n"
+                "- Use natural Bengali expressions: 'জি, আমি দেখছি', 'আপনার অর্ডার এখনো প্রক্রিয়াধীন', 'আমি আপনাকে সাহায্য করতে পারি'."
             ),
             tools=[
                 set_current_order,
@@ -40,7 +45,7 @@ class OrderAgent(BaseAgent):
                 update_delivery_address,
             ],
             llm=openai.LLM(model="gpt-4o-mini"),
-            tts=google.TTS(voice_name="en-IN-Chirp-HD-D", language="en-IN"),  # Will be overridden by BaseAgent based on language
+            tts=google.TTS(voice_name="bn-IN-Chirp3-HD-Despina", language="bn-IN"),  # Will be overridden by BaseAgent based on language
         )
     
     @function_tool()
@@ -60,7 +65,15 @@ class OrderAgent(BaseAgent):
     
     async def _generate_transfer_greeting(self) -> None:
         """Generate a greeting when OrderAgent becomes active."""
-        await self.session.generate_reply(
-            instructions="Say a very short intro: 'Hi, I'm the order agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
-        )
+        userdata = self.session.userdata
+        language = userdata.language or "en-IN"
+        
+        if language == "bn-BD":
+            await self.session.generate_reply(
+                instructions="Say a very short intro in Bangladesh Bengali: 'হাই, আমি অর্ডার এজেন্ট।' Then immediately proceed to help the user based on the context from the previous conversation in Bangladesh Bengali. Don't list capabilities, just identify yourself briefly and continue with what they need."
+            )
+        else:
+            await self.session.generate_reply(
+                instructions="Say a very short intro: 'Hi, I'm the order agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
+            )
 

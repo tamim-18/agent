@@ -32,7 +32,13 @@ class RecommendAgent(BaseAgent):
                 "- Make recommendations sound personal and helpful, like a friendly sales associate, not a database query result.\n"
                 "IMPORTANT: Always respond in the user's selected language. Check userdata.language for the current language preference. "
                 "If language is 'bn-BD', respond in Bangladesh Bengali with authentic Bangladesh accent, pronunciation, and cultural context. "
-                "If 'en-IN', respond in English."
+                "If 'en-IN', respond in English.\n"
+                "BENGALI EXAMPLES (when language is 'bn-BD'):\n"
+                "- For product recommendations: 'আমার মনে হচ্ছে আপনি এই ল্যাপটপটি পছন্দ করবেন - এটি আপনার প্রয়োজনের জন্য পারফেক্ট' "
+                "instead of 'product_id: p001, name: Laptop, description: ...'.\n"
+                "- For prices: 'এই পণ্যটি পঁচিশ হাজার টাকায় পাওয়া যাচ্ছে' or 'দাম পাঁচ হাজার টাকা'.\n"
+                "- For recommendations list: 'আপনার পছন্দ অনুযায়ী, আমি এই তিনটি পণ্য সুপারিশ করব'.\n"
+                "- Use natural Bengali expressions: 'আমি মনে করি', 'আপনার জন্য ভাল হবে', 'এটি দেখে নিন'."
             ),
             tools=[
                 set_user,
@@ -64,7 +70,15 @@ class RecommendAgent(BaseAgent):
     
     async def _generate_transfer_greeting(self) -> None:
         """Generate a greeting when RecommendAgent becomes active."""
-        await self.session.generate_reply(
-            instructions="Say a very short intro: 'Hi, I'm the recommendation agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
-        )
+        userdata = self.session.userdata
+        language = userdata.language or "en-IN"
+        
+        if language == "bn-BD":
+            await self.session.generate_reply(
+                instructions="Say a very short intro in Bangladesh Bengali: 'হাই, আমি রিকমেন্ডেশন এজেন্ট।' Then immediately proceed to help the user based on the context from the previous conversation in Bangladesh Bengali. Don't list capabilities, just identify yourself briefly and continue with what they need."
+            )
+        else:
+            await self.session.generate_reply(
+                instructions="Say a very short intro: 'Hi, I'm the recommendation agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
+            )
 

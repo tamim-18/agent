@@ -31,7 +31,12 @@ class ReturnAgent(BaseAgent):
                 "- Make it sound like you're personally helping them with their return, not just reading database information.\n"
                 "IMPORTANT: Always respond in the user's selected language. Check userdata.language for the current language preference. "
                 "If language is 'bn-BD', respond in Bangladesh Bengali with authentic Bangladesh accent, pronunciation, and cultural context. "
-                "If 'en-IN', respond in English."
+                "If 'en-IN', respond in English.\n"
+                "BENGALI EXAMPLES (when language is 'bn-BD'):\n"
+                "- For return status: 'আপনার রিটার্ন প্রক্রিয়াধীন আছে' or 'আমরা আপনার রিটার্নের জন্য পিকআপের ব্যবস্থা করছি'.\n"
+                "- For refund amounts: 'আপনার পাঁচ হাজার টাকার রিফান্ড প্রক্রিয়াধীন আছে'.\n"
+                "- For return initiation: 'আমি আপনার o302 নম্বর অর্ডারের জন্য রিটার্ন শুরু করেছি'.\n"
+                "- Use natural Bengali expressions: 'আমি আপনাকে সাহায্য করছি', 'চিন্তা করবেন না', 'আমি এখনই দেখছি'."
             ),
             tools=[
                 set_current_order,
@@ -41,7 +46,7 @@ class ReturnAgent(BaseAgent):
                 update_refund_status,
             ],
             llm=openai.LLM(model="gpt-4o-mini"),
-            tts=google.TTS(voice_name="en-US-Chirp-HD-D", language="en-US"),  # Will be overridden by BaseAgent based on language
+            tts=google.TTS(voice_name="bn-IN-Chirp3-HD-Despina", language="bn-IN"),  # Will be overridden by BaseAgent based on language
         )
     
     @function_tool()
@@ -61,7 +66,15 @@ class ReturnAgent(BaseAgent):
     
     async def _generate_transfer_greeting(self) -> None:
         """Generate a greeting when ReturnAgent becomes active."""
-        await self.session.generate_reply(
-            instructions="Say a very short intro: 'Hi, I'm the returns and refunds agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
-        )
+        userdata = self.session.userdata
+        language = userdata.language or "en-IN"
+        
+        if language == "bn-BD":
+            await self.session.generate_reply(
+                instructions="Say a very short intro in Bangladesh Bengali: 'হাই, আমি রিটার্ন এবং রিফান্ড এজেন্ট।' Then immediately proceed to help the user based on the context from the previous conversation in Bangladesh Bengali. Don't list capabilities, just identify yourself briefly and continue with what they need."
+            )
+        else:
+            await self.session.generate_reply(
+                instructions="Say a very short intro: 'Hi, I'm the returns and refunds agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
+            )
 

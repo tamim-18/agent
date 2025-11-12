@@ -53,7 +53,28 @@ class BaseAgent(Agent):
                 f"IMPORTANT: Respond in Bengali with Bangladesh accent and cultural context ({language}). "
                 f"The user has selected Bangladesh Bengali as their preferred language. "
                 f"Use Bangladesh Bengali pronunciation, vocabulary, and cultural references. "
-                f"All your responses must be in Bangladesh Bengali with authentic Bangladesh accent."
+                f"All your responses must be in Bangladesh Bengali with authentic Bangladesh accent. "
+                f"When greeting users, use appropriate Bangladesh Bengali greetings like 'আসসালামু আলাইকুম' (Assalamu Alaikum) or 'নমস্কার' (Namaskar). "
+                f"Use Bangladesh-specific cultural references, vocabulary, and expressions throughout your responses.\n\n"
+                f"বাংলায় কথা বলার নির্দেশনা (Instructions for Speaking in Bengali):\n"
+                f"- প্রাকৃতিকভাবে কথা বলুন, যেন আপনি একজন বন্ধুত্বপূর্ণ বাংলাদেশি গ্রাহক সেবা প্রতিনিধি। "
+                f"কথা বলার সময় স্বাভাবিক, সহজ এবং বন্ধুত্বপূর্ণ ভাষা ব্যবহার করুন।\n"
+                f"- উচ্চারণ: বাংলাদেশি বাংলা উচ্চারণ ব্যবহার করুন। 'তুমি' বলুন 'তুমি' হিসেবে, 'আপনি' বলুন 'আপনি' হিসেবে। "
+                f"শব্দগুলো স্পষ্ট এবং প্রাকৃতিকভাবে উচ্চারণ করুন।\n"
+                f"- বাক্য গঠন: ছোট এবং সহজ বাক্য ব্যবহার করুন। দীর্ঘ এবং জটিল বাক্য এড়িয়ে চলুন। "
+                f"উদাহরণ: 'আপনার অর্ডার o302 বর্তমানে প্রক্রিয়াধীন আছে' - এটি ভাল। "
+                f"'আপনার অর্ডার যার আইডি হলো o302 এবং যেটি বর্তমানে আমাদের সিস্টেমে প্রক্রিয়াধীন অবস্থায় রয়েছে' - এটি খুব দীর্ঘ, এড়িয়ে চলুন।\n"
+                f"- সাধারণ অভিব্যক্তি ব্যবহার করুন: 'জি, অবশ্যই', 'আচ্ছা', 'ঠিক আছে', 'ধন্যবাদ', 'আপনাকে সাহায্য করতে পেরে খুশি হলাম' ইত্যাদি।\n"
+                f"- সংখ্যা এবং পরিমাণ: সংখ্যাগুলো বাংলায় বলুন। উদাহরণ: 'পাঁচ হাজার টাকা', 'তিনটি আইটেম', 'দুই দিন'।\n"
+                f"- প্রশ্ন করার সময়: 'আপনার অর্ডার আইডি কী?' এর পরিবর্তে 'অর্ডার আইডি জানাবেন?' বা 'কোন অর্ডার নিয়ে জানতে চান?' "
+                f"এমন প্রাকৃতিক প্রশ্ন ব্যবহার করুন।\n"
+                f"- তথ্য দেওয়ার সময়: 'আপনার অর্ডার o302 বর্তমানে পেন্ডিং আছে' এর পরিবর্তে 'আপনার o302 নম্বর অর্ডারটি এখনো প্রক্রিয়াধীন আছে' "
+                f"এমন প্রাকৃতিকভাবে বলুন।\n"
+                f"- টাকা (Currency): সবসময় 'টাকা' বা 'tk' ব্যবহার করুন, 'রুপি' নয়। উদাহরণ: 'মোট পাঁচ হাজার টাকা' বা '৫০০০ tk'।\n"
+                f"- বন্ধুত্বপূর্ণ এবং সহায়ক হন: গ্রাহককে সাহায্য করতে ইচ্ছুক এবং বন্ধুত্বপূর্ণ ভাব প্রকাশ করুন। "
+                f"'আমি আপনাকে সাহায্য করতে পারি', 'চিন্তা করবেন না', 'আমি এখনই দেখে নিচ্ছি' ইত্যাদি ব্যবহার করুন।\n"
+                f"- প্রাকৃতিক কথোপকথন: যেন আপনি একজন বন্ধুর সাথে কথা বলছেন, কিন্তু সম্মানজনকভাবে। "
+                f"খুব আনুষ্ঠানিক বা খুব অনানুষ্ঠানিক হবেন না, মাঝামাঝি রাখুন।"
             )
         else:
             lang_name = "English"
@@ -75,18 +96,34 @@ class BaseAgent(Agent):
         )
         
         # Conversational response style instructions
-        conversational_instructions = (
-            "RESPONSE STYLE - CRITICAL:\n"
-            "- When presenting information from database queries or tool results, ALWAYS convert raw data into natural, conversational speech.\n"
-            "- Do NOT read out structured data verbatim (e.g., don't say 'order_id: o302, status: Pending').\n"
-            "- Instead, summarize and rephrase information as a friendly customer service agent would speak.\n"
-            "- For example, instead of 'Order o302 has status: Pending, items: [item1, item2], amount: 100', "
-            "say 'Your order o302 is currently pending. It includes [item names] and the total is 100 tk.'\n"
-            "- Always use 'tk' (Taka) as the currency unit, not 'rupee' or other currencies.\n"
-            "- Make responses sound natural and human-like, as if you're speaking directly to the customer.\n"
-            "- Focus on the key information the customer cares about, not technical details.\n"
-            "- Avoid reading lists or dictionaries verbatim - summarize and present information conversationally.\n"
-        )
+        if language == "bn-BD":
+            conversational_instructions = (
+                "RESPONSE STYLE - CRITICAL:\n"
+                "- When presenting information from database queries or tool results, ALWAYS convert raw data into natural, conversational speech.\n"
+                "- Do NOT read out structured data verbatim (e.g., don't say 'order_id: o302, status: Pending').\n"
+                "- Instead, summarize and rephrase information as a friendly customer service agent would speak in Bangladesh Bengali.\n"
+                "- For example, instead of 'Order o302 has status: Pending, items: [item1, item2], amount: 100', "
+                "say 'আপনার o302 নম্বর অর্ডারটি এখনো প্রক্রিয়াধীন আছে। এতে [আইটেমের নাম] আছে এবং মোট ১০০ টাকা।'\n"
+                "- Always use 'টাকা' or 'tk' (Taka) as the currency unit, not 'rupee' or other currencies.\n"
+                "- Make responses sound natural and human-like, as if you're speaking directly to the customer in Bangladesh Bengali.\n"
+                "- Focus on the key information the customer cares about, not technical details.\n"
+                "- Avoid reading lists or dictionaries verbatim - summarize and present information conversationally in natural Bengali.\n"
+                "- Use natural Bengali expressions: 'জি, অবশ্যই', 'আচ্ছা', 'ঠিক আছে', 'ধন্যবাদ' etc.\n"
+                "- Speak in short, clear sentences. Avoid very long or complex sentences.\n"
+            )
+        else:
+            conversational_instructions = (
+                "RESPONSE STYLE - CRITICAL:\n"
+                "- When presenting information from database queries or tool results, ALWAYS convert raw data into natural, conversational speech.\n"
+                "- Do NOT read out structured data verbatim (e.g., don't say 'order_id: o302, status: Pending').\n"
+                "- Instead, summarize and rephrase information as a friendly customer service agent would speak.\n"
+                "- For example, instead of 'Order o302 has status: Pending, items: [item1, item2], amount: 100', "
+                "say 'Your order o302 is currently pending. It includes [item names] and the total is 100 tk.'\n"
+                "- Always use 'tk' (Taka) as the currency unit, not 'rupee' or other currencies.\n"
+                "- Make responses sound natural and human-like, as if you're speaking directly to the customer.\n"
+                "- Focus on the key information the customer cares about, not technical details.\n"
+                "- Avoid reading lists or dictionaries verbatim - summarize and present information conversationally.\n"
+            )
         
         chat_ctx.add_message(
             role="system",
@@ -104,9 +141,14 @@ class BaseAgent(Agent):
         if userdata.prev_agent is None:
             # Initial greeting for first agent (GreeterAgent)
             # GreeterAgent will handle language selection via its instructions
-            await self.session.generate_reply(
-                instructions="Greet the user warmly. First check if language is set. If not, offer language selection between English and Bengali. Then ask how you can help."
-            )
+            if language == "bn-BD":
+                await self.session.generate_reply(
+                    instructions="Greet the user warmly in Bangladesh Bengali. Use appropriate Bangladesh Bengali greetings like 'আসসালামু আলাইকুম' (Assalamu Alaikum) or 'নমস্কার' (Namaskar). First check if language is set. If not, offer language selection between English and Bengali. Then ask how you can help in Bangladesh Bengali."
+                )
+            else:
+                await self.session.generate_reply(
+                    instructions="Greet the user warmly. First check if language is set. If not, offer language selection between English and Bengali. Then ask how you can help."
+                )
         else:
             # Default greeting for transferred agents (can be overridden)
             await self._generate_transfer_greeting()

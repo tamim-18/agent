@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { MessageActions } from './message-actions';
 
 export interface ChatEntryProps extends React.HTMLAttributes<HTMLLIElement> {
   /** The locale to use for the timestamp. */
@@ -28,33 +29,50 @@ export const ChatEntry = ({
 }: ChatEntryProps) => {
   const time = new Date(timestamp);
   const title = time.toLocaleTimeString(locale, { timeStyle: 'full' });
+  const isUser = messageOrigin === 'local';
+  const isAI = messageOrigin === 'remote';
 
   return (
     <li
       title={title}
       data-lk-message-origin={messageOrigin}
-      className={cn('group flex w-full flex-col gap-0.5', className)}
+      className={cn(
+        'group flex w-full flex-col gap-1.5 mb-4',
+        isUser ? 'items-end' : 'items-start',
+        className
+      )}
       {...props}
     >
-      <header
+      {/* Message Bubble */}
+      <div
         className={cn(
-          'text-muted-foreground flex items-center gap-2 text-sm',
-          messageOrigin === 'local' ? 'flex-row-reverse' : 'text-left'
+          'relative max-w-[85%] md:max-w-[75%] rounded-2xl px-4 py-2.5',
+          'transition-all duration-200',
+          isUser
+            ? // User message (right side) - dark grey bubble
+              'bg-[#2f2f2f] dark:bg-[#1f1f1f] text-white ml-auto'
+            : // AI message (left side) - lighter bubble with white background
+              'bg-white dark:bg-[#2a2a2a] text-foreground border border-border/50 mr-auto shadow-sm'
         )}
       >
-        {name && <strong>{name}</strong>}
-        <span className="font-mono text-xs opacity-0 transition-opacity ease-linear group-hover:opacity-100">
-          {hasBeenEdited && '*'}
-          {time.toLocaleTimeString(locale, { timeStyle: 'short' })}
-        </span>
-      </header>
+        {/* Message Text */}
+        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+          {message}
+        </p>
+
+        {/* Action Buttons - Only for AI messages */}
+        {isAI && <MessageActions message={message} />}
+      </div>
+
+      {/* Timestamp - Hidden by default, shown on hover */}
       <span
         className={cn(
-          'max-w-4/5 rounded-[20px]',
-          messageOrigin === 'local' ? 'bg-muted ml-auto p-2' : 'mr-auto'
+          'font-mono text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity',
+          isUser ? 'mr-2' : 'ml-2'
         )}
       >
-        {message}
+        {hasBeenEdited && '*'}
+        {time.toLocaleTimeString(locale, { timeStyle: 'short' })}
       </span>
     </li>
   );
