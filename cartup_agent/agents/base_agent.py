@@ -74,11 +74,26 @@ class BaseAgent(Agent):
             "- Database lookups are case-sensitive and will fail if IDs are not lowercase.\n"
         )
         
+        # Conversational response style instructions
+        conversational_instructions = (
+            "RESPONSE STYLE - CRITICAL:\n"
+            "- When presenting information from database queries or tool results, ALWAYS convert raw data into natural, conversational speech.\n"
+            "- Do NOT read out structured data verbatim (e.g., don't say 'order_id: o302, status: Pending').\n"
+            "- Instead, summarize and rephrase information as a friendly customer service agent would speak.\n"
+            "- For example, instead of 'Order o302 has status: Pending, items: [item1, item2], amount: 100', "
+            "say 'Your order o302 is currently pending. It includes [item names] and the total is 100 tk.'\n"
+            "- Always use 'tk' (Taka) as the currency unit, not 'rupee' or other currencies.\n"
+            "- Make responses sound natural and human-like, as if you're speaking directly to the customer.\n"
+            "- Focus on the key information the customer cares about, not technical details.\n"
+            "- Avoid reading lists or dictionaries verbatim - summarize and present information conversationally.\n"
+        )
+        
         chat_ctx.add_message(
             role="system",
             content=(
                 f"You are {agent_name}. Current session summary:\n{userdata.summarize()}\n\n"
                 f"{id_formatting_instructions}\n"
+                f"{conversational_instructions}\n"
                 f"{lang_instructions}"
             ),
         )
