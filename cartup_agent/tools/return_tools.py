@@ -12,11 +12,13 @@ from ..database.db import get_order, get_return, create_return_record, update_re
 
 @function_tool()
 async def initiate_return(
-    order_id: Annotated[str, Field(description="Order to return")],
+    order_id: Annotated[str, Field(description="Order to return. Must be lowercase format (e.g., o302).")],
     reason: Annotated[str, Field(description="Why returning")],
     context: RunContext_T,
 ) -> Dict[str, Any]:
     """Create/overwrite a return record."""
+    # Normalize to lowercase (handles cases where STT/LLM capitalizes IDs)
+    order_id = order_id.lower().strip()
     order = get_order(order_id)
     if not order:
         return {"error": f"Order {order_id} not found"}
@@ -37,10 +39,12 @@ async def initiate_return(
 
 @function_tool()
 async def get_return_status(
-    order_id: Annotated[str, Field(description="Order ID")],
+    order_id: Annotated[str, Field(description="Order ID. Must be lowercase format (e.g., o302).")],
     context: RunContext_T,
 ) -> Dict[str, Any]:
     """Return current return status (if any)."""
+    # Normalize to lowercase (handles cases where STT/LLM capitalizes IDs)
+    order_id = order_id.lower().strip()
     return_record = get_return(order_id)
     if not return_record:
         return {"error": f"No return found for order {order_id}"}
@@ -54,11 +58,13 @@ async def get_return_status(
 
 @function_tool()
 async def update_refund_status(
-    order_id: Annotated[str, Field(description="Order ID")],
+    order_id: Annotated[str, Field(description="Order ID. Must be lowercase format (e.g., o302).")],
     refund_status: Annotated[str, Field(description="New refund status")],
     context: RunContext_T,
 ) -> str:
     """Simulate refund progress update."""
+    # Normalize to lowercase (handles cases where STT/LLM capitalizes IDs)
+    order_id = order_id.lower().strip()
     return_record = get_return(order_id)
     if not return_record:
         return f"No return found for order {order_id}"

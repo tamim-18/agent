@@ -8,6 +8,16 @@ from typing import Optional, Dict, Any, List
 from contextlib import contextmanager
 from pathlib import Path
 
+from .seed_data import (
+    get_seed_users,
+    get_seed_products,
+    get_seed_orders,
+    get_seed_tickets,
+    get_seed_returns,
+    get_seed_recommendations,
+    get_seed_wishlists,
+)
+
 # Database path
 DB_DIR = Path(__file__).parent / "data"
 DB_PATH = DB_DIR / "cartup.db"
@@ -412,6 +422,79 @@ def get_wishlist_for_user(user_id: str) -> List[str]:
         return []
 
 
+def _seed_database(conn: sqlite3.Connection):
+    """Seed database with sample data from seed_data module."""
+    # Seed users
+    users = get_seed_users()
+    for user_data in users:
+        conn.execute(
+            "INSERT INTO users (user_id, name, phone, email, created_at) VALUES (?, ?, ?, ?, ?)",
+            user_data
+        )
+    
+    # Seed products
+    products = get_seed_products()
+    for product_data in products:
+        conn.execute(
+            "INSERT INTO products (product_id, name, description, price, category, in_stock, stock_quantity) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            product_data
+        )
+    
+    # Seed orders and order items
+    orders = get_seed_orders()
+    for order_data in orders:
+        conn.execute(
+            "INSERT INTO orders (order_id, user_id, status, amount, delivery_date, address, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (
+                order_data["order_id"],
+                order_data["user_id"],
+                order_data["status"],
+                order_data["amount"],
+                order_data["delivery_date"],
+                order_data["address"],
+                order_data["created_at"],
+            )
+        )
+        # Insert order items
+        for item_name, quantity in order_data["items"]:
+            conn.execute(
+                "INSERT INTO order_items (order_id, product_name, quantity) VALUES (?, ?, ?)",
+                (order_data["order_id"], item_name, quantity)
+            )
+    
+    # Seed tickets
+    tickets = get_seed_tickets()
+    for ticket_data in tickets:
+        conn.execute(
+            "INSERT INTO tickets (ticket_id, order_id, issue, status, created_at) VALUES (?, ?, ?, ?, ?)",
+            ticket_data
+        )
+    
+    # Seed returns
+    returns = get_seed_returns()
+    for return_data in returns:
+        conn.execute(
+            "INSERT INTO returns (order_id, status, refund_status, reason, created_at) VALUES (?, ?, ?, ?, ?)",
+            return_data
+        )
+    
+    # Seed recommendations
+    recommendations = get_seed_recommendations()
+    for rec_data in recommendations:
+        conn.execute(
+            "INSERT INTO recommendations (user_id, product_name) VALUES (?, ?)",
+            rec_data
+        )
+    
+    # Seed wishlists
+    wishlists = get_seed_wishlists()
+    for wishlist_data in wishlists:
+        conn.execute(
+            "INSERT INTO wishlists (user_id, product_id) VALUES (?, ?)",
+            wishlist_data
+        )
+
+
 def init_database():
     """Initialize database with schema and sample data."""
     # Ensure database directory exists
@@ -431,132 +514,26 @@ def init_database():
     
     # Initialize ID sequences
     with get_connection() as conn:
-        # Set initial values matching dummy_db
+        # Set initial values to accommodate seed data
+        # Users: up to u125, Orders: up to o325, Products: up to p025, Tickets: up to t525
         conn.execute(
             "INSERT OR IGNORE INTO id_sequences (entity_type, next_value) VALUES (?, ?)",
             ("ticket", 600)
         )
         conn.execute(
             "INSERT OR IGNORE INTO id_sequences (entity_type, next_value) VALUES (?, ?)",
-            ("order", 500)
+            ("order", 400)
         )
         conn.execute(
             "INSERT OR IGNORE INTO id_sequences (entity_type, next_value) VALUES (?, ?)",
-            ("product", 100)
+            ("product", 30)
         )
         conn.execute(
             "INSERT OR IGNORE INTO id_sequences (entity_type, next_value) VALUES (?, ?)",
-            ("user", 200)
+            ("user", 130)
         )
     
-    # Seed sample data
+    # Seed sample data using modular seed_data module
     with get_connection() as conn:
-        # Sample users
-        conn.execute(
-            "INSERT INTO users (user_id, name, phone, email, created_at) VALUES (?, ?, ?, ?, ?)",
-            ("u101", "Alex", "555-1234", "alex@example.com", "2025-11-01")
-        )
-        conn.execute(
-            "INSERT INTO users (user_id, name, phone, email, created_at) VALUES (?, ?, ?, ?, ?)",
-            ("u202", "Mehedi", "017xx-xxxxx", "mehedi@cartup.local", "2025-11-01")
-        )
-        conn.execute(
-            "INSERT INTO users (user_id, name, phone, email, created_at) VALUES (?, ?, ?, ?, ?)",
-            ("u303", "Sarah", "555-5678", "sarah@example.com", "2025-11-01")
-        )
-        
-        # Sample products
-        conn.execute(
-            "INSERT INTO products (product_id, name, description, price, category, in_stock, stock_quantity) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ("p001", "Smartphone", "Latest model smartphone with advanced features", 299.99, "Electronics", 1, 50)
-        )
-        conn.execute(
-            "INSERT INTO products (product_id, name, description, price, category, in_stock, stock_quantity) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ("p002", "Wireless Earbuds", "High-quality wireless earbuds with noise cancellation", 79.99, "Electronics", 1, 100)
-        )
-        conn.execute(
-            "INSERT INTO products (product_id, name, description, price, category, in_stock, stock_quantity) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ("p003", "Phone Case", "Protective case for smartphones", 19.99, "Accessories", 1, 200)
-        )
-        conn.execute(
-            "INSERT INTO products (product_id, name, description, price, category, in_stock, stock_quantity) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ("p004", "USB-C Charger", "Fast charging USB-C cable", 15.99, "Accessories", 1, 150)
-        )
-        conn.execute(
-            "INSERT INTO products (product_id, name, description, price, category, in_stock, stock_quantity) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ("p005", "Laptop", "High-performance laptop for work and gaming", 899.99, "Electronics", 1, 25)
-        )
-        
-        # Sample orders
-        conn.execute(
-            "INSERT INTO orders (order_id, user_id, status, amount, delivery_date, address, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ("o301", "u101", "Delivered", 320.00, "2025-11-06", "12 Baker Street, Dhaka", "2025-11-01")
-        )
-        conn.execute(
-            "INSERT INTO order_items (order_id, product_name, quantity) VALUES (?, ?, ?)",
-            ("o301", "Smartphone", 1)
-        )
-        conn.execute(
-            "INSERT INTO order_items (order_id, product_name, quantity) VALUES (?, ?, ?)",
-            ("o301", "Charger", 1)
-        )
-        
-        conn.execute(
-            "INSERT INTO orders (order_id, user_id, status, amount, delivery_date, address, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ("o302", "u101", "In Transit", 79.99, "2025-11-10", "12 Baker Street, Dhaka", "2025-11-05")
-        )
-        conn.execute(
-            "INSERT INTO order_items (order_id, product_name, quantity) VALUES (?, ?, ?)",
-            ("o302", "Wireless Earbuds", 1)
-        )
-        
-        conn.execute(
-            "INSERT INTO orders (order_id, user_id, status, amount, delivery_date, address, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ("o401", "u202", "Processing", 19.99, None, "SUST Hall, Sylhet", "2025-11-08")
-        )
-        conn.execute(
-            "INSERT INTO order_items (order_id, product_name, quantity) VALUES (?, ?, ?)",
-            ("o401", "Phone Case", 1)
-        )
-        
-        conn.execute(
-            "INSERT INTO orders (order_id, user_id, status, amount, delivery_date, address, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            ("o402", "u303", "Delivered", 899.99, "2025-11-07", "456 Main Street, New York", "2025-11-02")
-        )
-        conn.execute(
-            "INSERT INTO order_items (order_id, product_name, quantity) VALUES (?, ?, ?)",
-            ("o402", "Laptop", 1)
-        )
-        
-        # Sample tickets
-        conn.execute(
-            "INSERT INTO tickets (ticket_id, order_id, issue, status, created_at) VALUES (?, ?, ?, ?, ?)",
-            ("t501", "o301", "Damaged product", "Resolved", "2025-11-03")
-        )
-        
-        # Sample recommendations
-        conn.execute(
-            "INSERT INTO recommendations (user_id, product_name) VALUES (?, ?)",
-            ("u101", "Phone Case")
-        )
-        conn.execute(
-            "INSERT INTO recommendations (user_id, product_name) VALUES (?, ?)",
-            ("u101", "Wireless Earbuds")
-        )
-        conn.execute(
-            "INSERT INTO recommendations (user_id, product_name) VALUES (?, ?)",
-            ("u202", "USB-C Charger")
-        )
-        conn.execute(
-            "INSERT INTO recommendations (user_id, product_name) VALUES (?, ?)",
-            ("u202", "Phone Case")
-        )
-        conn.execute(
-            "INSERT INTO recommendations (user_id, product_name) VALUES (?, ?)",
-            ("u303", "Wireless Earbuds")
-        )
-        conn.execute(
-            "INSERT INTO recommendations (user_id, product_name) VALUES (?, ?)",
-            ("u303", "USB-C Charger")
-        )
+        _seed_database(conn)
 

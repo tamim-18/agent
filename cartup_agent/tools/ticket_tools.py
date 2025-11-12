@@ -13,11 +13,13 @@ from ..utils.helpers import _next_id
 
 @function_tool()
 async def create_ticket(
-    order_id: Annotated[str, Field(description="Related order ID")],
+    order_id: Annotated[str, Field(description="Related order ID. Must be lowercase format (e.g., o302).")],
     issue: Annotated[str, Field(description="Short issue description")],
     context: RunContext_T,
 ) -> Dict[str, Any]:
     """Create a ticket and return ticket data."""
+    # Normalize to lowercase (handles cases where STT/LLM capitalizes IDs)
+    order_id = order_id.lower().strip()
     order = get_order(order_id)
     if not order:
         return {"error": f"Order {order_id} not found"}
@@ -42,10 +44,12 @@ async def create_ticket(
 
 @function_tool()
 async def track_ticket(
-    ticket_id: Annotated[str, Field(description="Ticket ID to check (e.g., t602)")],
+    ticket_id: Annotated[str, Field(description="Ticket ID to check (e.g., t602). Must be lowercase format.")],
     context: RunContext_T,
 ) -> Dict[str, Any]:
     """Fetch ticket status."""
+    # Normalize to lowercase (handles cases where STT/LLM capitalizes IDs)
+    ticket_id = ticket_id.lower().strip()
     ticket = get_ticket(ticket_id)
     if not ticket:
         return {"error": f"Ticket {ticket_id} not found"}
@@ -59,9 +63,11 @@ async def track_ticket(
 
 @function_tool()
 async def get_ticket_status(
-    ticket_id: Annotated[str, Field(description="Ticket ID to check")],
+    ticket_id: Annotated[str, Field(description="Ticket ID to check. Must be lowercase format (e.g., t602).")],
     context: RunContext_T,
 ) -> Dict[str, Any]:
     """Get ticket status and details."""
+    # Normalize to lowercase (handles cases where STT/LLM capitalizes IDs)
+    ticket_id = ticket_id.lower().strip()
     return await track_ticket(ticket_id, context)
 

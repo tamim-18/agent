@@ -12,10 +12,12 @@ from ..database.db import get_order, get_user, update_order_address
 
 @function_tool()
 async def get_order_details(
-    order_id: Annotated[str, Field(description="Order ID to fetch (e.g., o302)")],
+    order_id: Annotated[str, Field(description="Order ID to fetch (e.g., o302). Must be lowercase format.")],
     context: RunContext_T,
 ) -> Dict[str, Any]:
     """Fetch order details from database."""
+    # Normalize to lowercase (handles cases where STT/LLM capitalizes IDs)
+    order_id = order_id.lower().strip()
     order = get_order(order_id)
     if not order:
         return {"error": f"Order {order_id} not found"}
@@ -33,10 +35,12 @@ async def get_order_details(
 
 @function_tool()
 async def get_user_orders(
-    user_id: Annotated[str, Field(description="User ID to fetch orders for (e.g., u101)")],
+    user_id: Annotated[str, Field(description="User ID to fetch orders for (e.g., u101). Must be lowercase format.")],
     context: RunContext_T,
 ) -> Dict[str, Any]:
     """Get all orders for a user."""
+    # Normalize to lowercase (handles cases where STT/LLM capitalizes IDs)
+    user_id = user_id.lower().strip()
     user = get_user(user_id)
     if not user:
         return {"error": f"User {user_id} not found"}
@@ -65,11 +69,13 @@ async def get_user_orders(
 
 @function_tool()
 async def update_delivery_address(
-    order_id: Annotated[str, Field(description="Order ID to update")],
+    order_id: Annotated[str, Field(description="Order ID to update. Must be lowercase format (e.g., o302).")],
     new_address: Annotated[str, Field(description="New delivery address")],
     context: RunContext_T,
 ) -> str:
     """Update delivery address for an order (simulated)."""
+    # Normalize to lowercase (handles cases where STT/LLM capitalizes IDs)
+    order_id = order_id.lower().strip()
     order = get_order(order_id)
     if not order:
         return f"Order {order_id} not found"

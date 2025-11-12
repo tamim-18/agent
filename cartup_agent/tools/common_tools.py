@@ -12,20 +12,24 @@ from ..config import get_tts_for_language
 
 @function_tool()
 async def set_user(
-    user_id: Annotated[str, Field(description="The authenticated/assumed user id (e.g., u101)")],
+    user_id: Annotated[str, Field(description="The authenticated/assumed user id (e.g., u101). Must be lowercase format.")],
     context: RunContext_T,
 ) -> str:
     """Attach a known user_id to the session (simulates auth / caller lookup)."""
+    # Normalize to lowercase (handles cases where STT/LLM capitalizes IDs)
+    user_id = user_id.lower().strip()
     context.userdata.user_id = user_id
     return f"User set to {user_id}"
 
 
 @function_tool()
 async def set_current_order(
-    order_id: Annotated[str, Field(description="Order id to focus on (e.g., o302)")],
+    order_id: Annotated[str, Field(description="Order id to focus on (e.g., o302). Must be lowercase format.")],
     context: RunContext_T,
 ) -> str:
     """Set the focal order id for follow-up queries (track/modify)."""
+    # Normalize to lowercase (handles cases where STT/LLM capitalizes IDs)
+    order_id = order_id.lower().strip()
     context.userdata.current_order_id = order_id
     return f"Current order set to {order_id}"
 

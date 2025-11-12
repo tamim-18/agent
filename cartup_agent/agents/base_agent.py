@@ -62,10 +62,23 @@ class BaseAgent(Agent):
                 f"All your responses must be in {lang_name}."
             )
         
+        # ID formatting instructions
+        id_formatting_instructions = (
+            "CRITICAL ID FORMATTING RULES:\n"
+            "- ALL IDs must be in LOWERCASE format: user_id (e.g., 'u101'), order_id (e.g., 'o302'), "
+            "ticket_id (e.g., 't602'), product_id (e.g., 'p001'), return order_id (e.g., 'o302').\n"
+            "- When users mention IDs verbally (e.g., 'o302', 'O302', 'O 302'), ALWAYS convert to lowercase "
+            "before calling tools (e.g., 'o302').\n"
+            "- If STT or transcription provides capitalized IDs (e.g., 'O302'), convert them to lowercase "
+            "immediately before using in tool calls.\n"
+            "- Database lookups are case-sensitive and will fail if IDs are not lowercase.\n"
+        )
+        
         chat_ctx.add_message(
             role="system",
             content=(
                 f"You are {agent_name}. Current session summary:\n{userdata.summarize()}\n\n"
+                f"{id_formatting_instructions}\n"
                 f"{lang_instructions}"
             ),
         )
