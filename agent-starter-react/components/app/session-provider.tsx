@@ -8,7 +8,7 @@ import { useRoom } from '@/hooks/useRoom';
 const SessionContext = createContext<{
   appConfig: AppConfig;
   isSessionActive: boolean;
-  startSession: () => void;
+  startSession: (language?: 'en-IN' | 'bn-BD') => void;
   endSession: () => void;
 }>({
   appConfig: APP_CONFIG_DEFAULTS,

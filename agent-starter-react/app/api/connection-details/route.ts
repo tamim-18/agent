@@ -29,14 +29,19 @@ export async function POST(req: Request) {
       throw new Error('LIVEKIT_API_SECRET is not defined');
     }
 
-    // Parse agent configuration from request body
+    // Parse agent configuration and language from request body
     const body = await req.json();
     const agentName: string = body?.room_config?.agents?.[0]?.agent_name;
+    
+    // Extract and validate language
+    const validLanguages = ['en-IN', 'bn-BD'];
+    const language: string = validLanguages.includes(body?.language) ? body.language : 'en-IN';
 
     // Generate participant token
     const participantName = 'user';
     const participantIdentity = `voice_assistant_user_${Math.floor(Math.random() * 10_000)}`;
-    const roomName = `voice_assistant_room_${Math.floor(Math.random() * 10_000)}`;
+    // Include language in room name pattern: voice_assistant_room_{language}_{random}
+    const roomName = `voice_assistant_room_${language}_${Math.floor(Math.random() * 10_000)}`;
 
     const participantToken = await createParticipantToken(
       { identity: participantIdentity, name: participantName },

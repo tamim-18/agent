@@ -5,6 +5,7 @@ import { toastAlert } from '@/components/livekit/alert-toast';
 
 export function useRoom(appConfig: AppConfig) {
   const aborted = useRef(false);
+  const languageRef = useRef<'en-IN' | 'bn-BD'>('en-IN');
   const room = useMemo(() => new Room(), []);
   const [isSessionActive, setIsSessionActive] = useState(false);
 
@@ -52,6 +53,7 @@ export function useRoom(appConfig: AppConfig) {
               'X-Sandbox-Id': appConfig.sandboxId ?? '',
             },
             body: JSON.stringify({
+              language: languageRef.current,
               room_config: appConfig.agentName
                 ? {
                     agents: [{ agent_name: appConfig.agentName }],
@@ -68,8 +70,9 @@ export function useRoom(appConfig: AppConfig) {
     [appConfig]
   );
 
-  const startSession = useCallback(() => {
+  const startSession = useCallback((language: 'en-IN' | 'bn-BD' = 'en-IN') => {
     setIsSessionActive(true);
+    languageRef.current = language;
 
     if (room.state === 'disconnected') {
       const { isPreConnectBufferEnabled } = appConfig;

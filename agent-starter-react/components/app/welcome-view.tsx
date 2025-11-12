@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button } from '@/components/livekit/button';
 
 function WelcomeImage() {
@@ -20,7 +21,7 @@ function WelcomeImage() {
 
 interface WelcomeViewProps {
   startButtonText: string;
-  onStartCall: () => void;
+  onStartCall: (language: 'en-IN' | 'bn-BD') => void;
 }
 
 export const WelcomeView = ({
@@ -28,6 +29,8 @@ export const WelcomeView = ({
   onStartCall,
   ref,
 }: React.ComponentProps<'div'> & WelcomeViewProps) => {
+  const [selectedLanguage, setSelectedLanguage] = useState<'en-IN' | 'bn-BD'>('en-IN');
+
   return (
     <div ref={ref}>
       <section className="bg-background flex flex-col items-center justify-center text-center">
@@ -37,7 +40,41 @@ export const WelcomeView = ({
           Chat live with CartUp voice assistant
         </p>
 
-        <Button variant="primary" size="lg" onClick={onStartCall} className="mt-6 w-64 font-mono">
+        {/* Language Selection */}
+        <div className="mt-4 flex flex-col gap-3">
+          <p className="text-sm text-muted-foreground">Select your language:</p>
+          <div className="flex gap-4 justify-center">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="language"
+                value="en-IN"
+                checked={selectedLanguage === 'en-IN'}
+                onChange={(e) => setSelectedLanguage(e.target.value as 'en-IN' | 'bn-BD')}
+                className="w-4 h-4"
+              />
+              <span className="text-sm">English</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="language"
+                value="bn-BD"
+                checked={selectedLanguage === 'bn-BD'}
+                onChange={(e) => setSelectedLanguage(e.target.value as 'en-IN' | 'bn-BD')}
+                className="w-4 h-4"
+              />
+              <span className="text-sm">বাংলা (Bengali)</span>
+            </label>
+          </div>
+        </div>
+
+        <Button 
+          variant="primary" 
+          size="lg" 
+          onClick={() => onStartCall(selectedLanguage)} 
+          className="mt-6 w-64 font-mono"
+        >
           {startButtonText}
         </Button>
       </section>
