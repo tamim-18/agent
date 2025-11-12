@@ -61,6 +61,6 @@ class TicketAgent(BaseAgent):
     async def _generate_transfer_greeting(self) -> None:
         """Generate a greeting when TicketAgent becomes active."""
         await self.session.generate_reply(
-            instructions="Greet the user briefly and let them know you're here to help with their support issue. Mention you can create a ticket, track existing tickets, or check ticket status."
+            instructions="Say a very short intro: 'Hi, I'm the support ticket agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
         )
 

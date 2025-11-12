@@ -65,6 +65,6 @@ class RecommendAgent(BaseAgent):
     async def _generate_transfer_greeting(self) -> None:
         """Generate a greeting when RecommendAgent becomes active."""
         await self.session.generate_reply(
-            instructions="Greet the user briefly and let them know you're here to help with product recommendations. Mention you can provide personalized recommendations, show product details, or help add items to their wishlist."
+            instructions="Say a very short intro: 'Hi, I'm the recommendation agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
         )
 

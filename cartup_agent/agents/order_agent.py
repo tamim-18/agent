@@ -61,6 +61,6 @@ class OrderAgent(BaseAgent):
     async def _generate_transfer_greeting(self) -> None:
         """Generate a greeting when OrderAgent becomes active."""
         await self.session.generate_reply(
-            instructions="Greet the user briefly and let them know you're here to help with their order. Mention you can check order status, details, delivery addresses, or order history."
+            instructions="Say a very short intro: 'Hi, I'm the order agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
         )
 
