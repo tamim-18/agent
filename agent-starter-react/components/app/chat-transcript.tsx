@@ -70,10 +70,12 @@ export function ChatTranscript({
         >
           {messages.map(({ id, timestamp, from, message, editTimestamp }: ReceivedChatMessage) => {
             const locale = navigator?.language ?? 'en-US';
+            
             // Determine message origin: 
             // - Agent messages (isAgent = true) → left side (remote/AI)
             // - User messages (isLocal = true) → right side (local/user)
-            const messageOrigin = from?.isAgent ? 'remote' : (from?.isLocal ? 'local' : 'remote');
+            const messageOrigin = from?.isLocal ? 'local' : 'remote';
+            
             const hasBeenEdited = !!editTimestamp;
 
             return (

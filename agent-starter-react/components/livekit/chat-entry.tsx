@@ -52,7 +52,7 @@ export const ChatEntry = ({
             ? // User message (right side) - dark grey bubble
               'bg-[#2f2f2f] dark:bg-[#1f1f1f] text-white ml-auto'
             : // AI message (left side) - lighter bubble with white background
-              'bg-white dark:bg-[#2a2a2a] text-foreground border border-border/50 mr-auto shadow-sm'
+              'bg-white dark:bg-[#2a2a2a] text-foreground border border-border/50 shadow-sm mr-auto'
         )}
       >
         {/* Message Text */}
