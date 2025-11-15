@@ -45,7 +45,7 @@ class TicketAgent(BaseAgent):
                 get_ticket_status,
             ],
             llm=openai.LLM(model="gpt-4o-mini"),
-            tts=google.TTS(voice_name="bn-IN-Chirp3-HD-Despina", language="bn-IN"),  # Align with other agents' English TTS
+            tts=google.TTS(voice_name="bn-IN-Chirp3-HD-Despina", language="bn-IN", speaking_rate=1.1),  # Align with other agents' English TTS
         )
     
     @function_tool()

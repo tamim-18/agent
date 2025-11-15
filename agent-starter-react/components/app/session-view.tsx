@@ -77,8 +77,8 @@ export const SessionView = ({
     leave: true,
     microphone: true,
     chat: appConfig.supportsChatInput,
-    camera: appConfig.supportsVideoInput,
-    screenShare: appConfig.supportsVideoInput,
+    // camera: appConfig.supportsVideoInput, // Commented out for later use
+    // screenShare: appConfig.supportsVideoInput, // Commented out for later use
   };
 
   useEffect(() => {

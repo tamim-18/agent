@@ -37,7 +37,7 @@ class BaseAgent(Agent):
             truncated_chat_ctx = userdata.prev_agent.chat_ctx.copy(
                 exclude_instructions=True,
                 exclude_function_call=False
-            ).truncate(max_items=20)
+            ).truncate(max_items=10)
             
             existing_ids = {item.id for item in chat_ctx.items}
             items_copy = [
@@ -96,7 +96,38 @@ class BaseAgent(Agent):
         )
         
         # Conversational response style instructions
+        # Check if this is GreeterAgent (exclude from thank you branding)
+        is_greeter = agent_name == "GreeterAgent"
+        
         if language == "bn-BD":
+            thank_you_branding = (
+                "" if is_greeter else (
+                    "\nTHANK YOU RESPONSE - CRITICAL:\n"
+                    "- When the user says 'thank you', 'thanks', 'ধন্যবাদ', 'থ্যাংক ইউ', or similar gratitude expressions, "
+                    "ALWAYS respond with: 'আপনাকে স্বাগতম। বাংলাদেশের নম্বর ওয়ান ই-কমার্স প্ল্যাটফর্ম কার্টআপের সাথে থাকার জন্য ধন্যবাদ।' "
+                    "(Translation: 'You're welcome. Thank you for staying with Bangladesh number one e-commerce platform CartUp.')\n"
+                    "- Keep it natural and warm, but always include the branding message.\n"
+                )
+            )
+            
+            # Scope limitation applies to ALL agents including GreeterAgent
+            scope_limitation = (
+                "\nSCOPE LIMITATION - CRITICAL:\n"
+                "- You are a CartUp e-commerce customer service agent. You can ONLY help with:\n"
+                "  * Order tracking, status, and modifications\n"
+                "  * Support ticket creation and tracking\n"
+                "  * Returns and refunds\n"
+                "  * Product recommendations\n"
+                "  * General CartUp platform questions\n"
+                "- If the user asks for anything unrelated to e-commerce or CartUp (e.g., 'sing me a song', 'tell me a joke', "
+                "'play music', 'tell a story', 'what's the weather', 'general knowledge questions', etc.), "
+                "politely decline and redirect:\n"
+                "  * Bengali: 'আমি দুঃখিত, আমি শুধুমাত্র কার্টআপের অর্ডার, টিকেট, রিটার্ন এবং পণ্য সম্পর্কিত সাহায্য করতে পারি। "
+                "আপনি কীভাবে সাহায্য করতে পারি?' "
+                "(Translation: 'I'm sorry, I can only help with CartUp orders, tickets, returns, and products. How can I help you?')\n"
+                "- Be polite but firm - do not entertain non-e-commerce requests.\n"
+            )
+            
             conversational_instructions = (
                 "RESPONSE STYLE - CRITICAL:\n"
                 "- When presenting information from database queries or tool results, ALWAYS convert raw data into natural, conversational speech.\n"
@@ -110,8 +141,35 @@ class BaseAgent(Agent):
                 "- Avoid reading lists or dictionaries verbatim - summarize and present information conversationally in natural Bengali.\n"
                 "- Use natural Bengali expressions: 'জি, অবশ্যই', 'আচ্ছা', 'ঠিক আছে', 'ধন্যবাদ' etc.\n"
                 "- Speak in short, clear sentences. Avoid very long or complex sentences.\n"
+                f"{thank_you_branding}"
+                f"{scope_limitation}"
             )
         else:
+            thank_you_branding = (
+                "" if is_greeter else (
+                    "\nTHANK YOU RESPONSE - CRITICAL:\n"
+                    "- When the user says 'thank you', 'thanks', or similar gratitude expressions, "
+                    "ALWAYS respond with: 'You're welcome. Thank you for staying with Bangladesh number one e-commerce platform CartUp.'\n"
+                    "- Keep it natural and warm, but always include the branding message.\n"
+                )
+            )
+            
+            # Scope limitation applies to ALL agents including GreeterAgent
+            scope_limitation = (
+                "\nSCOPE LIMITATION - CRITICAL:\n"
+                "- You are a CartUp e-commerce customer service agent. You can ONLY help with:\n"
+                "  * Order tracking, status, and modifications\n"
+                "  * Support ticket creation and tracking\n"
+                "  * Returns and refunds\n"
+                "  * Product recommendations\n"
+                "  * General CartUp platform questions\n"
+                "- If the user asks for anything unrelated to e-commerce or CartUp (e.g., 'sing me a song', 'tell me a joke', "
+                "'play music', 'tell a story', 'what's the weather', 'general knowledge questions', etc.), "
+                "politely decline and redirect:\n"
+                "  * English: 'I'm sorry, I can only help with CartUp orders, tickets, returns, and products. How can I help you?'\n"
+                "- Be polite but firm - do not entertain non-e-commerce requests.\n"
+            )
+            
             conversational_instructions = (
                 "RESPONSE STYLE - CRITICAL:\n"
                 "- When presenting information from database queries or tool results, ALWAYS convert raw data into natural, conversational speech.\n"
@@ -123,6 +181,8 @@ class BaseAgent(Agent):
                 "- Make responses sound natural and human-like, as if you're speaking directly to the customer.\n"
                 "- Focus on the key information the customer cares about, not technical details.\n"
                 "- Avoid reading lists or dictionaries verbatim - summarize and present information conversationally.\n"
+                f"{thank_you_branding}"
+                f"{scope_limitation}"
             )
         
         chat_ctx.add_message(
@@ -140,14 +200,14 @@ class BaseAgent(Agent):
         # Generate greeting for all agents
         if userdata.prev_agent is None:
             # Initial greeting for first agent (GreeterAgent)
-            # GreeterAgent will handle language selection via its instructions
+            # GreeterAgent will use its own concise branding greeting
             if language == "bn-BD":
                 await self.session.generate_reply(
-                    instructions="Greet the user warmly in Bangladesh Bengali. Use appropriate Bangladesh Bengali greetings like 'আসসালামু আলাইকুম' (Assalamu Alaikum) or 'নমস্কার' (Namaskar). First check if language is set. If not, offer language selection between English and Bengali. Then ask how you can help in Bangladesh Bengali."
+                    instructions="Say concisely: 'স্বাগতম বাংলাদেশের নম্বর ওয়ান ই-কমার্স প্ল্যাটফর্ম কার্টআপে। আমি আপনাকে কীভাবে সাহায্য করতে পারি?' Keep it short and to the point. No extra explanations."
                 )
             else:
                 await self.session.generate_reply(
-                    instructions="Greet the user warmly. First check if language is set. If not, offer language selection between English and Bengali. Then ask how you can help."
+                    instructions="Say concisely: 'Welcome to Bangladesh number one e-commerce platform CartUp. How can I help you today?' Keep it short and to the point. No extra explanations."
                 )
         else:
             # Default greeting for transferred agents (can be overridden)

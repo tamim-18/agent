@@ -42,7 +42,7 @@ def get_voice_pipeline():
     return {
         "stt": google.STT(),
         "llm": openai.LLM(model="gpt-4o-mini"),
-        "tts": google.TTS(voice_name="en-IN-Chirp-HD-F", language="en-IN"),
+        "tts": google.TTS(voice_name="en-IN-Chirp-HD-F", language="en-IN", speaking_rate=1.2),
         "vad": silero.VAD.load(),
     }
 
@@ -53,7 +53,7 @@ AGENT_CONFIG = {
 }
 
 
-def get_tts_for_language(language: str, voice_name: str = None, gender: str = "female"):
+def get_tts_for_language(language: str, voice_name: str = None, gender: str = "female", speaking_rate: float = 1.2):
     """
     Returns appropriate TTS instance based on language preference.
     
@@ -61,6 +61,7 @@ def get_tts_for_language(language: str, voice_name: str = None, gender: str = "f
         language: Language code ("en-IN" or "bn-BD" for Bangladesh Bengali)
         voice_name: Optional specific voice name to use (overrides default and gender)
         gender: Gender preference ("male" or "female") - only used for Bengali if voice_name not provided
+        speaking_rate: Speaking rate multiplier (0.25 to 4.0, default 1.2 for 1.2x speed)
     
     Returns:
         Google TTS instance configured for the specified language
@@ -73,11 +74,11 @@ def get_tts_for_language(language: str, voice_name: str = None, gender: str = "f
         else:
             voice = BENGALI_TTS_VOICE_FEMALE
         # Use bn-IN language code for TTS (voices are bn-IN), but accent comes from LLM instructions
-        return google.TTS(voice_name=voice, language="bn-IN")
+        return google.TTS(voice_name=voice, language="bn-IN", speaking_rate=speaking_rate)
     else:
         # Default to English
         voice = voice_name or ENGLISH_TTS_VOICE
-        return google.TTS(voice_name=voice, language="en-IN")
+        return google.TTS(voice_name=voice, language="en-IN", speaking_rate=speaking_rate)
 
 
 # Bengali voice options for Bangladesh (bn-BD) - for easy testing

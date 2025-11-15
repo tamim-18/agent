@@ -7,7 +7,7 @@ from livekit.plugins import google, openai
 
 from .base_agent import BaseAgent
 from ..session.user_data import RunContext_T
-from ..tools.common_tools import set_user, set_current_order, set_language
+from ..tools.common_tools import set_user, set_current_order
 
 
 class GreeterAgent(BaseAgent):
@@ -17,14 +17,15 @@ class GreeterAgent(BaseAgent):
         super().__init__(
             instructions=(
                 "You are CartUp's friendly voice assistant.\n"
-                "FIRST, check if the user has selected a language preference (check userdata.language). "
-                "If no language is set, you MUST offer language selection: 'Would you like to continue in English or Bengali? Please say English or Bengali.' "
-                "When the user responds with their choice, call the set_language tool with 'en-IN' for English or 'bn-BD' for Bangladesh Bengali.\n"
-                "After language is selected, greet the caller warmly in the selected language and figure out what they need, then route them.\n"
-                "IMPORTANT GREETING RULES:\n"
-                "- If language is 'bn-BD' (Bangladesh Bengali), greet with appropriate Bangladesh Bengali greetings like 'আসসালামু আলাইকুম' (Assalamu Alaikum) or 'নমস্কার' (Namaskar). "
-                "Use warm, culturally appropriate Bangladesh Bengali greetings that make the user feel welcome.\n"
-                "- If language is 'en-IN' (English), greet with standard English greetings like 'Hello' or 'Hi, welcome to CartUp'.\n"
+                "IMPORTANT: Language is already selected (check userdata.language). Do NOT ask for language selection.\n"
+                "GREETING RULES - Keep it concise and to the point:\n"
+                "- ALWAYS start with the branding message: 'Welcome to Bangladesh number one e-commerce platform CartUp' (in the user's language)\n"
+                "- Then immediately ask how you can help: 'How can I help you today?' or 'আমি আপনাকে কীভাবে সাহায্য করতে পারি?' (Bengali)\n"
+                "- Keep the greeting short - no extra fluff or explanations\n"
+                "BRANDING MESSAGES:\n"
+                "- English: 'Welcome to Bangladesh number one e-commerce platform CartUp. How can I help you today?'\n"
+                "- Bengali: 'স্বাগতম বাংলাদেশের নম্বর ওয়ান ই-কমার্স প্ল্যাটফর্ম কার্টআপে। আমি আপনাকে কীভাবে সাহায্য করতে পারি?'\n"
+                "ROUTING:\n"
                 "If they want: order tracking/modification ⇒ OrderAgent; issue/ticket ⇒ TicketAgent; "
                 "returns/refunds ⇒ ReturnAgent; recommendations ⇒ RecommendAgent.\n"
                 "Ask for user_id or order_id when needed and call the appropriate tools.\n"
@@ -32,9 +33,9 @@ class GreeterAgent(BaseAgent):
                 "If language is 'bn-BD', respond in Bangladesh Bengali with authentic Bangladesh accent, pronunciation, and cultural context. "
                 "If 'en-IN', respond in English."
             ),
-            tools=[set_user, set_current_order, set_language],
+            tools=[set_user, set_current_order],
             llm=openai.LLM(model="gpt-4o-mini"),
-            tts=google.TTS(voice_name="bn-IN-Chirp3-HD-Despina", language="bn-IN"),
+            tts=google.TTS(voice_name="bn-IN-Chirp3-HD-Despina", language="bn-IN", speaking_rate=1.1),
         )
     
     @function_tool()
@@ -58,17 +59,16 @@ class GreeterAgent(BaseAgent):
         return await self._transfer_to_agent("recommend", context)
     
     async def _generate_transfer_greeting(self) -> None:
-        """Generate a greeting when GreeterAgent becomes active after transfer."""
+        """Generate a concise greeting when GreeterAgent becomes active after transfer."""
         userdata = self.session.userdata
-        if not userdata.language:
-            # If language not set, prompt for selection
+        language = userdata.language or "en-IN"
+        
+        if language == "bn-BD":
             await self.session.generate_reply(
-                instructions="Welcome back! Would you like to continue in English or Bengali? Please say 'English' or 'Bengali'."
+                instructions="Say concisely: 'স্বাগতম বাংলাদেশের নম্বর ওয়ান ই-কমার্স প্ল্যাটফর্ম কার্টআপে। আমি আপনাকে কীভাবে সাহায্য করতে পারি?' Then wait for user response."
             )
         else:
-            # Language is set, greet normally
-            lang_name = "English" if userdata.language == "en-IN" else "Bengali (Bangladesh)"
             await self.session.generate_reply(
-                instructions=f"Welcome back! How can I help you today? (Responding in {lang_name})"
+                instructions="Say concisely: 'Welcome to Bangladesh number one e-commerce platform CartUp. How can I help you today?' Then wait for user response."
             )
 

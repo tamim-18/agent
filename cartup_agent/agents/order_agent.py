@@ -45,7 +45,7 @@ class OrderAgent(BaseAgent):
                 update_delivery_address,
             ],
             llm=openai.LLM(model="gpt-4o-mini"),
-            tts=google.TTS(voice_name="bn-IN-Chirp3-HD-Despina", language="bn-IN"),  # Will be overridden by BaseAgent based on language
+            tts=google.TTS(voice_name="bn-IN-Chirp3-HD-Despina", language="bn-IN", speaking_rate=1.1),  # Will be overridden by BaseAgent based on language
         )
     
     @function_tool()

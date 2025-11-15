@@ -12,6 +12,9 @@ dependencies = [
     "livekit-plugins-turn-detector>=1.0.0",
     "python-dotenv>=1.0.0",
     "livekit-plugins-noise-cancellation~=0.2",
+    "openai>=1.0.0",
+    "google-generativeai>=0.3.0",
+    "pillow>=10.0.0",
 ]
 
 [project.optional-dependencies]

@@ -50,7 +50,7 @@ class RecommendAgent(BaseAgent):
             llm=openai.LLM(model="gpt-4o-mini"),
             # Use a different Bengali voice optimized for recommendations (warmer, friendlier tone)
             # Trying "Aoede" voice which may sound better for product recommendations
-            tts=google.TTS(voice_name="bn-IN-Chirp3-HD-Pulcherrima", language="bn-IN"),
+            tts=google.TTS(voice_name="bn-IN-Chirp3-HD-Pulcherrima", language="bn-IN", speaking_rate=1.1),
         )
     
     @function_tool()
