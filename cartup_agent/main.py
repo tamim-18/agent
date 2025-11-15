@@ -10,6 +10,7 @@ import logging
 from livekit import agents
 from livekit.agents import JobContext, WorkerOptions, cli
 from livekit.agents.voice import AgentSession
+from livekit.agents import UserStateChangedEvent
 from livekit.plugins import google, openai, silero, noise_cancellation
 from livekit.agents import RoomInputOptions
 from .database.db import init_database
@@ -52,16 +53,18 @@ async def entrypoint(ctx: JobContext):
     # Create session state
     userdata = UserData()
     userdata.language = language  # Set language upfront
+    logger.info(f"Setting userdata.language = {language}")
     
-    # Instantiate all agents
+    # Instantiate all agents with language-aware TTS
+    logger.info(f"Instantiating agents with language: {language}")
     userdata.agents.update({
-        "greeter": GreeterAgent(),
-        "order": OrderAgent(),
-        "ticket": TicketAgent(),
-        "returns": ReturnAgent(),
-        "recommend": RecommendAgent(),
+        "greeter": GreeterAgent(language=language),
+        "order": OrderAgent(language=language),
+        "ticket": TicketAgent(language=language),
+        "returns": ReturnAgent(language=language),
+        "recommend": RecommendAgent(language=language),
     })
-    logger.info("All agents instantiated")
+    logger.info(f"All agents instantiated with dynamic TTS (language: {language})")
     
     # Configure STT based on selected language
     if language == "bn-BD":
@@ -95,7 +98,7 @@ async def entrypoint(ctx: JobContext):
         tts_config = get_tts_for_language("en-IN")
         logger.info("Configured TTS for English (en-IN)")
     
-    # Configure voice pipeline
+    # Configure voice pipeline with faster interruption detection
     session = AgentSession[UserData](
         userdata=userdata,
         stt=stt_config,
@@ -103,7 +106,24 @@ async def entrypoint(ctx: JobContext):
         tts=tts_config,  # Language-aware TTS configuration
         vad=silero.VAD.load(),
         max_tool_steps=5,
+        # Faster interruption detection to minimize leftover words
+        min_interruption_duration=0.4,  # Lower threshold for faster interruption (default: 0.5)
+        min_interruption_words=0,  # Interrupt immediately on any speech (default: 0)
     )
+    
+    # Add interruption handler to explicitly stop TTS when user starts speaking
+    # This helps clear the TTS audio buffer immediately, especially for Bengali
+    @session.on("user_state_changed")
+    def on_user_state_changed(ev: UserStateChangedEvent):
+        """Handle user state changes and explicitly interrupt TTS when user starts speaking."""
+        if ev.new_state == "speaking":
+            # User started speaking - explicitly interrupt to clear TTS buffer
+            # This prevents leftover words from previous response from playing
+            try:
+                session.interrupt()
+                logger.debug("Interrupted agent speech due to user speaking")
+            except Exception as e:
+                logger.warning(f"Error interrupting session: {e}")
     
     # Start session with greeter agent
     await session.start(

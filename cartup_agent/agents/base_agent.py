@@ -26,6 +26,7 @@ class BaseAgent(Agent):
         
         # Get language preference (default to English if not set)
         language = userdata.language or "en-IN"
+        logger.info(f"[{agent_name}] Language preference: {language} (from userdata.language: {userdata.language})")
         
         # Note: Agent's TTS is read-only and set during initialization.
         # The session-level TTS will be used, and we configure language-aware TTS
@@ -200,14 +201,14 @@ class BaseAgent(Agent):
         # Generate greeting for all agents
         if userdata.prev_agent is None:
             # Initial greeting for first agent (GreeterAgent)
-            # GreeterAgent will use its own concise branding greeting
+            # GreeterAgent will use its own concise branding greeting with name
             if language == "bn-BD":
                 await self.session.generate_reply(
-                    instructions="Say concisely: 'স্বাগতম বাংলাদেশের নম্বর ওয়ান ই-কমার্স প্ল্যাটফর্ম কার্টআপে। আমি আপনাকে কীভাবে সাহায্য করতে পারি?' Keep it short and to the point. No extra explanations."
+                    instructions="Say concisely: 'স্বাগতম বাংলাদেশের নম্বর ওয়ান ই-কমার্স প্ল্যাটফর্ম কার্টআপে। আমি নাওমে, কার্টআপের গ্রীটার এজেন্ট। আমি আপনাকে কীভাবে সাহায্য করতে পারি?' Keep it short and to the point. No extra explanations."
                 )
             else:
                 await self.session.generate_reply(
-                    instructions="Say concisely: 'Welcome to Bangladesh number one e-commerce platform CartUp. How can I help you today?' Keep it short and to the point. No extra explanations."
+                    instructions="Say concisely: 'Welcome to Bangladesh number one e-commerce platform CartUp. I'm Nawme, CartUp's greeter agent. How can I help you today?' Keep it short and to the point. No extra explanations."
                 )
         else:
             # Default greeting for transferred agents (can be overridden)

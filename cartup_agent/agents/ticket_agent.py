@@ -14,10 +14,22 @@ from ..tools.ticket_tools import create_ticket, track_ticket, get_ticket_status
 class TicketAgent(BaseAgent):
     """Agent that creates and tracks support tickets for orders."""
     
-    def __init__(self) -> None:
+    def __init__(self, language: str = "en-IN") -> None:
+        import logging
+        logger = logging.getLogger("cartup-agent")
+        
+        # Dynamic TTS based on language
+        if language == "bn-BD":
+            tts_config = google.TTS(voice_name="bn-IN-Chirp3-HD-Orus", language="bn-IN", speaking_rate=1.2)
+            #logger.info(f"[TicketAgent] TTS configured: Bengali voice 'bn-IN-Chirp3-HD-Despina' (language: bn-IN)")
+        else:
+            tts_config = google.TTS(voice_name="en-IN-Chirp3-HD-Laomedeia", language="en-IN", speaking_rate=1.2)
+            #logger.info(f"[TicketAgent] TTS configured: English voice 'en-IN-Chirp3-HD-Algenib' (language: en-IN)")
+        
         super().__init__(
             instructions=(
                 "You create and track support tickets for orders (missing, damaged, wrong item, etc.).\n"
+                "Your name is Rafid (রাফিদ). You are CartUp's support ticket agent.\n"
                 "Before asking for user_id or order_id, FIRST check the session summary (userdata) and last tool results. "
                 "If they are already present, do not re-ask and proceed.\n"
                 "Ask for order_id, issue description; create ticket; return ticket_id and status.\n"
@@ -45,7 +57,7 @@ class TicketAgent(BaseAgent):
                 get_ticket_status,
             ],
             llm=openai.LLM(model="gpt-4o-mini"),
-            tts=google.TTS(voice_name="bn-IN-Chirp3-HD-Despina", language="bn-IN", speaking_rate=1.1),  # Align with other agents' English TTS
+            tts=tts_config,
         )
     
     @function_tool()
@@ -70,10 +82,10 @@ class TicketAgent(BaseAgent):
         
         if language == "bn-BD":
             await self.session.generate_reply(
-                instructions="Say a very short intro in Bangladesh Bengali: 'হাই, আমি সাপোর্ট টিকেট এজেন্ট।' Then immediately proceed to help the user based on the context from the previous conversation in Bangladesh Bengali. Don't list capabilities, just identify yourself briefly and continue with what they need."
+                instructions="Say a very short intro in Bangladesh Bengali: 'হাই, আমি রাফিদ, কার্টআপের সাপোর্ট টিকেট এজেন্ট।' Then immediately proceed to help the user based on the context from the previous conversation in Bangladesh Bengali. Don't list capabilities, just identify yourself briefly and continue with what they need."
             )
         else:
             await self.session.generate_reply(
-                instructions="Say a very short intro: 'Hi, I'm the support ticket agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
+                instructions="Say a very short intro: 'Hi, I'm Rafid, CartUp's support ticket agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
             )
 

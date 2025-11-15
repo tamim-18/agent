@@ -2,22 +2,34 @@
 Order management agent - handles order queries and updates
 """
 
+import logging
 from livekit.agents.llm import function_tool
 from livekit.plugins import google, openai
 
 from .base_agent import BaseAgent    
 from ..session.user_data import RunContext_T
 from ..tools.common_tools import set_current_order, to_greeter  
-from ..tools.order_tools import get_order_details, get_user_orders, update_delivery_address  
+from ..tools.order_tools import get_order_details, get_user_orders, update_delivery_address
+
+logger = logging.getLogger("cartup-agent")  
 
 
 class OrderAgent(BaseAgent):
     """Agent that handles order queries: status, items, amount, ETA, address updates."""
     
-    def __init__(self) -> None:
+    def __init__(self, language: str = "en-IN") -> None:
+        # Dynamic TTS based on language
+        if language == "bn-BD":
+            tts_config = google.TTS(voice_name="bn-IN-Chirp3-HD-Despina", language="bn-IN", speaking_rate=1.1)
+            #logger.info(f"[OrderAgent] TTS configured: Bengali voice 'bn-IN-Chirp3-HD-Despina' (language: bn-IN)")
+        else:
+            tts_config = google.TTS(voice_name="en-IN-Chirp-HD-F", language="en-IN", speaking_rate=1.1)
+            #logger.info(f"[OrderAgent] TTS configured: English voice 'en-IN-Chirp3-HD-Algenib' (language: en-IN)")
+        
         super().__init__(
             instructions=(
                 "You handle order queries: status, items, amount, ETA, address updates.\n"
+                "Your name is Tanisha (তানিশা). You are CartUp's order agent.\n"
                 "Before asking for user_id or order_id, FIRST check the session summary (userdata) and last tool results. "
                 "If they are already present, do not re-ask and proceed.\n"
                 "If user_id or order_id is missing, politely ask and then call tools.\n"
@@ -45,7 +57,7 @@ class OrderAgent(BaseAgent):
                 update_delivery_address,
             ],
             llm=openai.LLM(model="gpt-4o-mini"),
-            tts=google.TTS(voice_name="bn-IN-Chirp3-HD-Despina", language="bn-IN", speaking_rate=1.1),  # Will be overridden by BaseAgent based on language
+            tts=tts_config,
         )
     
     @function_tool()
@@ -67,13 +79,14 @@ class OrderAgent(BaseAgent):
         """Generate a greeting when OrderAgent becomes active."""
         userdata = self.session.userdata
         language = userdata.language or "en-IN"
+        logger.info(f"[OrderAgent] Generating transfer greeting with language: {language} (from userdata.language: {userdata.language})")
         
         if language == "bn-BD":
             await self.session.generate_reply(
-                instructions="Say a very short intro in Bangladesh Bengali: 'হাই, আমি অর্ডার এজেন্ট।' Then immediately proceed to help the user based on the context from the previous conversation in Bangladesh Bengali. Don't list capabilities, just identify yourself briefly and continue with what they need."
+                instructions="Say a very short intro in Bangladesh Bengali: 'হাই, আমি তানিশা, কার্টআপের অর্ডার এজেন্ট।' Then immediately proceed to help the user based on the context from the previous conversation in Bangladesh Bengali. Don't list capabilities, just identify yourself briefly and continue with what they need."
             )
         else:
             await self.session.generate_reply(
-                instructions="Say a very short intro: 'Hi, I'm the order agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
+                instructions="Say a very short intro: 'Hi, I'm Tanisha, CartUp's order agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
             )
 

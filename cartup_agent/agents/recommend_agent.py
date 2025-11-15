@@ -14,11 +14,23 @@ from ..tools.recommend_tools import get_recommendations, get_product_details, ad
 class RecommendAgent(BaseAgent):
     """Agent that provides personalized product recommendations."""
     
-    def __init__(self) -> None:
+    def __init__(self, language: str = "en-IN") -> None:
+        import logging
+        logger = logging.getLogger("cartup-agent")
+        
+        # Dynamic TTS based on language
+        if language == "bn-BD":
+            tts_config = google.TTS(voice_name="bn-IN-Chirp3-HD-Callirrhoe", language="bn-IN", speaking_rate=1.1)
+            logger.info(f"[RecommendAgent] TTS configured: Bengali voice 'bn-IN-Chirp3-HD-Despina' (language: bn-IN)")
+        else:
+            tts_config = google.TTS(voice_name="en-IN-Chirp3-HD-Algenib", language="en-IN", speaking_rate=1.1)
+            logger.info(f"[RecommendAgent] TTS configured: English voice 'en-IN-Chirp3-HD-Algenib' (language: en-IN)")
+        
         super().__init__(
             instructions=(
                 "You provide simple personalized recommendations using a dummy profile list. "
                 "Ask for user_id if missing. Offer to add to wishlist (simulated). "
+                "Your name is Sneha (স্নেহা). You are CartUp's recommendation agent.\n"
                 "Before asking for user_id or order_id, FIRST check the session summary (userdata) and last tool results. "
                 "If they are already present, do not re-ask and proceed.\n"
                 "If the user wants to check orders, create tickets, or process returns, transfer to the appropriate agent.\n"
@@ -48,9 +60,7 @@ class RecommendAgent(BaseAgent):
                 add_to_wishlist,
             ],
             llm=openai.LLM(model="gpt-4o-mini"),
-            # Use a different Bengali voice optimized for recommendations (warmer, friendlier tone)
-            # Trying "Aoede" voice which may sound better for product recommendations
-            tts=google.TTS(voice_name="bn-IN-Chirp3-HD-Pulcherrima", language="bn-IN", speaking_rate=1.1),
+            tts=tts_config,
         )
     
     @function_tool()
@@ -75,10 +85,10 @@ class RecommendAgent(BaseAgent):
         
         if language == "bn-BD":
             await self.session.generate_reply(
-                instructions="Say a very short intro in Bangladesh Bengali: 'হাই, আমি রিকমেন্ডেশন এজেন্ট।' Then immediately proceed to help the user based on the context from the previous conversation in Bangladesh Bengali. Don't list capabilities, just identify yourself briefly and continue with what they need."
+                instructions="Say a very short intro in Bangladesh Bengali: 'হাই, আমি স্নেহা, কার্টআপের রিকমেন্ডেশন এজেন্ট।' Then immediately proceed to help the user based on the context from the previous conversation in Bangladesh Bengali. Don't list capabilities, just identify yourself briefly and continue with what they need."
             )
         else:
             await self.session.generate_reply(
-                instructions="Say a very short intro: 'Hi, I'm the recommendation agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
+                instructions="Say a very short intro: 'Hi, I'm Sneha, CartUp's recommendation agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
             )
 

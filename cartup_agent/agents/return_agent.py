@@ -14,11 +14,23 @@ from ..tools.return_tools import initiate_return, get_return_status, update_refu
 class ReturnAgent(BaseAgent):
     """Agent that manages returns and refunds."""
     
-    def __init__(self) -> None:
+    def __init__(self, language: str = "en-IN") -> None:
+        import logging
+        logger = logging.getLogger("cartup-agent")
+        
+        # Dynamic TTS based on language
+        if language == "bn-BD":
+            tts_config = google.TTS(voice_name="bn-IN-Chirp3-HD-Iapetus", language="bn-IN", speaking_rate=1.1)
+            #logger.info(f"[ReturnAgent] TTS configured: Bengali voice 'bn-IN-Chirp3-HD-Despina' (language: bn-IN)")
+        else:
+            tts_config = google.TTS(voice_name="en-IN-Chirp3-HD-Alnilam", language="en-IN", speaking_rate=1.1)
+            #logger.info(f"[ReturnAgent] TTS configured: English voice 'en-IN-Chirp3-HD-Algenib' (language: en-IN)")
+        
         super().__init__(
             instructions=(
                 "You manage returns and refunds. Ask for order_id; mark a return as initiated; "
                 "report return and refund status.\n"
+                "Your name is Ayan (আয়ান). You are CartUp's returns and refunds agent.\n"
                 "Before asking for user_id or order_id, FIRST check the session summary (userdata) and last tool results. "
                 "If they are already present, do not re-ask and proceed.\n"
                 "If the user wants to check orders, create tickets, or get recommendations, transfer to the appropriate agent.\n"
@@ -46,7 +58,7 @@ class ReturnAgent(BaseAgent):
                 update_refund_status,
             ],
             llm=openai.LLM(model="gpt-4o-mini"),
-            tts=google.TTS(voice_name="bn-IN-Chirp3-HD-Despina", language="bn-IN", speaking_rate=1.1),  # Will be overridden by BaseAgent based on language
+            tts=tts_config,
         )
     
     @function_tool()
@@ -71,10 +83,10 @@ class ReturnAgent(BaseAgent):
         
         if language == "bn-BD":
             await self.session.generate_reply(
-                instructions="Say a very short intro in Bangladesh Bengali: 'হাই, আমি রিটার্ন এবং রিফান্ড এজেন্ট।' Then immediately proceed to help the user based on the context from the previous conversation in Bangladesh Bengali. Don't list capabilities, just identify yourself briefly and continue with what they need."
+                instructions="Say a very short intro in Bangladesh Bengali: 'হাই, আমি আয়ান, কার্টআপের রিটার্ন এবং রিফান্ড এজেন্ট।' Then immediately proceed to help the user based on the context from the previous conversation in Bangladesh Bengali. Don't list capabilities, just identify yourself briefly and continue with what they need."
             )
         else:
             await self.session.generate_reply(
-                instructions="Say a very short intro: 'Hi, I'm the returns and refunds agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
+                instructions="Say a very short intro: 'Hi, I'm Ayan, CartUp's returns and refunds agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
             )
 
