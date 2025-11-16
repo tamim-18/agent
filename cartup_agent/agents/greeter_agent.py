@@ -4,6 +4,7 @@ Greeter agent - initial point of contact and routing agent
 
 from livekit.agents.llm import function_tool
 from livekit.plugins import google, openai
+from livekit.plugins.google import beta as google_beta
 
 from .base_agent import BaseAgent
 from ..session.user_data import RunContext_T
@@ -22,12 +23,26 @@ class GreeterAgent(BaseAgent):
             tts_config = google.TTS(voice_name="bn-IN-Chirp3-HD-Despina", language="bn-IN", speaking_rate=1.1)
             #logger.info(f"[GreeterAgent] TTS configured: Bengali voice 'bn-IN-Chirp3-HD-Despina' (language: bn-IN)")
         else:
-            tts_config = google.TTS(voice_name="en-IN-Chirp3-HD-Despina", language="en-IN", speaking_rate=1.1)
+            tts_config = google.TTS(voice_name="en-IN-Chirp3-HD-Despina", language="en-IN", speaking_rate=1)
             #logger.info(f"[GreeterAgent] TTS configured: English voice 'en-IN-Chirp3-HD-Algenib' (language: en-IN)")
+
+        # if language == "bn-BD":
+        #     tts_config = google_beta.GeminiTTS(
+        #         model="gemini-2.5-flash-preview-tts",
+        #         voice_name="alloy-bn",  # Example Bengali voice
+        #         instructions="Speak in a friendly and engaging tone, using Bangladeshi Bengali accent."
+        #     )
+        # else:
+        #     tts_config = google_beta.GeminiTTS(
+        #         model="gemini-2.5-flash-preview-tts",
+        #         voice_name="Zephyr",  # Example English voice
+        #         instructions="Speak in a friendly and engaging tone, Bangladeshi English accent."
+        #     )
         
         super().__init__(
             instructions=(
-                "You are CartUp's friendly voice assistant. Your name is Nawme (নাওমে).\n"
+                "Start by introducing yourself to the user."
+                "You are CartUp's friendly voice assistant. Your name is Nawme (নাওমি). You are CartUp's customer assistant.\n"
                 "IMPORTANT: Language is already selected (check userdata.language). Do NOT ask for language selection.\n"
                 "GREETING RULES - Keep it concise and to the point:\n"
                 "- ALWAYS start with the branding message: 'Welcome to Bangladesh number one e-commerce platform CartUp' (in the user's language)\n"
@@ -128,10 +143,9 @@ class GreeterAgent(BaseAgent):
         
         if language == "bn-BD":
             await self.session.generate_reply(
-                instructions="Say concisely: 'স্বাগতম বাংলাদেশের নম্বর ওয়ান ই-কমার্স প্ল্যাটফর্ম কার্টআপে। আমি নাওমে, কার্টআপের গ্রীটার এজেন্ট। আমি আপনাকে কীভাবে সাহায্য করতে পারি?' Then wait for user response."
+                instructions="Say concisely: 'স্বাগতম বাংলাদেশের নম্বর ওয়ান ই-কমার্স প্ল্যাটফর্ম কার্টআপে। আমি নাওমি, কার্টআপের কাস্টমার অ্যাসিস্ট্যান্ট। আমি আপনাকে কীভাবে সাহায্য করতে পারি?' Then wait for user response."
             )
         else:
             await self.session.generate_reply(
-                instructions="Say concisely: 'Welcome to Bangladesh number one e-commerce platform CartUp. I'm Nawme, CartUp's greeter agent. How can I help you today?' Then wait for user response."
+                instructions="Say concisely: 'Welcome to Bangladesh number one e-commerce platform CartUp. I'm Nawme, CartUp's Customer Assistant. How can I help you today?' Then wait for user response."
             )
-

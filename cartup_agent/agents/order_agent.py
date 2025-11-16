@@ -20,16 +20,16 @@ class OrderAgent(BaseAgent):
     def __init__(self, language: str = "en-IN") -> None:
         # Dynamic TTS based on language
         if language == "bn-BD":
-            tts_config = google.TTS(voice_name="bn-IN-Chirp3-HD-Despina", language="bn-IN", speaking_rate=1.1)
+            tts_config = google.TTS(voice_name="bn-IN-Chirp3-HD-Aoede", language="bn-IN", speaking_rate=1.1)
             #logger.info(f"[OrderAgent] TTS configured: Bengali voice 'bn-IN-Chirp3-HD-Despina' (language: bn-IN)")
         else:
-            tts_config = google.TTS(voice_name="en-IN-Chirp-HD-F", language="en-IN", speaking_rate=1.1)
+            tts_config = google.TTS(voice_name="en-IN-Chirp-HD-F", language="en-IN", speaking_rate=1)
             #logger.info(f"[OrderAgent] TTS configured: English voice 'en-IN-Chirp3-HD-Algenib' (language: en-IN)")
         
         super().__init__(
             instructions=(
+                "Start by introducing yourself: 'Hi, I’m Tanisha (তানিশা), CartUp's order support assistant.'\n"
                 "You handle order queries: status, items, amount, ETA, address updates.\n"
-                "Your name is Tanisha (তানিশা). You are CartUp's order agent.\n"
                 "Before asking for user_id or order_id, FIRST check the session summary (userdata) and last tool results. "
                 "If they are already present, do not re-ask and proceed.\n"
                 "If user_id or order_id is missing, politely ask and then call tools.\n"
@@ -83,10 +83,9 @@ class OrderAgent(BaseAgent):
         
         if language == "bn-BD":
             await self.session.generate_reply(
-                instructions="Say a very short intro in Bangladesh Bengali: 'হাই, আমি তানিশা, কার্টআপের অর্ডার এজেন্ট।' Then immediately proceed to help the user based on the context from the previous conversation in Bangladesh Bengali. Don't list capabilities, just identify yourself briefly and continue with what they need."
+                instructions="Say a very short intro in Bangladesh Bengali: 'হাই, আমি তানিশা, কার্টআপের অর্ডার সাপোর্ট অ্যাসিস্ট্যান্ট।।' Then immediately proceed to help the user based on the context from the previous conversation in Bangladesh Bengali. Don't list capabilities, just identify yourself briefly and continue with what they need."
             )
         else:
             await self.session.generate_reply(
-                instructions="Say a very short intro: 'Hi, I'm Tanisha, CartUp's order agent.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
+                instructions="Say a very short intro: 'Hi, I'm Tanisha, CartUp's order support assistant.' Then immediately proceed to help the user based on the context from the previous conversation. Don't list capabilities, just identify yourself briefly and continue with what they need."
             )
-

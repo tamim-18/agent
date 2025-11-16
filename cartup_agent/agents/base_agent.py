@@ -67,6 +67,13 @@ class BaseAgent(Agent):
                 f"'আপনার অর্ডার যার আইডি হলো o302 এবং যেটি বর্তমানে আমাদের সিস্টেমে প্রক্রিয়াধীন অবস্থায় রয়েছে' - এটি খুব দীর্ঘ, এড়িয়ে চলুন।\n"
                 f"- সাধারণ অভিব্যক্তি ব্যবহার করুন: 'জি, অবশ্যই', 'আচ্ছা', 'ঠিক আছে', 'ধন্যবাদ', 'আপনাকে সাহায্য করতে পেরে খুশি হলাম' ইত্যাদি।\n"
                 f"- সংখ্যা এবং পরিমাণ: সংখ্যাগুলো বাংলায় বলুন। উদাহরণ: 'পাঁচ হাজার টাকা', 'তিনটি আইটেম', 'দুই দিন'।\n"
+                f"- TTS উচ্চারণের জন্য গুরুত্বপূর্ণ ফরম্যাটিং (CRITICAL for TTS pronunciation):\n"
+                f"  * কখনোই হাইফেন (-) ব্যবহার করবেন না। হাইফেনের পরিবর্তে স্পেস ব্যবহার করুন বা সরিয়ে দিন। "
+                f"উদাহরণ: 'o-302' নয়, বলুন 'o 302' বা 'o302'। 'user-id' নয়, বলুন 'user id' বা 'userid'।\n"
+                f"  * সংখ্যার পরে ডট (.) থাকলে, সেটি উচ্চারণ করবেন না। '1.' বলবেন 'এক' বা 'প্রথম' হিসেবে, '1 dot' নয়। "
+                f"'2.' বলবেন 'দুই' বা 'দ্বিতীয়' হিসেবে। উদাহরণ: 'আপনার 1 নম্বর অর্ডার' বা 'প্রথম অর্ডার', '1 dot' নয়।\n"
+                f"  * সংখ্যাগুলো বাংলায় উচ্চারণ করুন: '1' = 'এক', '2' = 'দুই', '3' = 'তিন', '10' = 'দশ', '100' = 'একশ', '1000' = 'এক হাজার'।\n"
+                f"  * অর্ডার আইডি বা আইডি বলার সময়: 'o-302' নয়, বলুন 'o 302' বা 'o তিনশ দুই'। 'u-101' নয়, বলুন 'u 101' বা 'u একশ এক'।\n"
                 f"- প্রশ্ন করার সময়: 'আপনার অর্ডার আইডি কী?' এর পরিবর্তে 'অর্ডার আইডি জানাবেন?' বা 'কোন অর্ডার নিয়ে জানতে চান?' "
                 f"এমন প্রাকৃতিক প্রশ্ন ব্যবহার করুন।\n"
                 f"- তথ্য দেওয়ার সময়: 'আপনার অর্ডার o302 বর্তমানে পেন্ডিং আছে' এর পরিবর্তে 'আপনার o302 নম্বর অর্ডারটি এখনো প্রক্রিয়াধীন আছে' "
@@ -94,6 +101,7 @@ class BaseAgent(Agent):
             "- If STT or transcription provides capitalized IDs (e.g., 'O302'), convert them to lowercase "
             "immediately before using in tool calls.\n"
             "- Database lookups are case-sensitive and will fail if IDs are not lowercase.\n"
+            "- If any bangla punctuation found, handle it appropriately to avoid errors. Don't mix English and Bangla punctuation in addresses.\n"
         )
         
         # Conversational response style instructions
@@ -114,7 +122,7 @@ class BaseAgent(Agent):
             # Scope limitation applies to ALL agents including GreeterAgent
             scope_limitation = (
                 "\nSCOPE LIMITATION - CRITICAL:\n"
-                "- You are a CartUp e-commerce customer service agent. You can ONLY help with:\n"
+                "- You are a CartUp e-commerce customer service assistant. You can ONLY help with:\n"
                 "  * Order tracking, status, and modifications\n"
                 "  * Support ticket creation and tracking\n"
                 "  * Returns and refunds\n"
@@ -124,13 +132,14 @@ class BaseAgent(Agent):
                 "'play music', 'tell a story', 'what's the weather', 'general knowledge questions', etc.), "
                 "politely decline and redirect:\n"
                 "  * Bengali: 'আমি দুঃখিত, আমি শুধুমাত্র কার্টআপের অর্ডার, টিকেট, রিটার্ন এবং পণ্য সম্পর্কিত সাহায্য করতে পারি। "
-                "আপনি কীভাবে সাহায্য করতে পারি?' "
+                "আপনাকে কীভাবে সাহায্য করতে পারি?' "
                 "(Translation: 'I'm sorry, I can only help with CartUp orders, tickets, returns, and products. How can I help you?')\n"
                 "- Be polite but firm - do not entertain non-e-commerce requests.\n"
             )
             
             conversational_instructions = (
                 "RESPONSE STYLE - CRITICAL:\n"
+                "- Start by introducing yourself to the user."
                 "- When presenting information from database queries or tool results, ALWAYS convert raw data into natural, conversational speech.\n"
                 "- Do NOT read out structured data verbatim (e.g., don't say 'order_id: o302, status: Pending').\n"
                 "- Instead, summarize and rephrase information as a friendly customer service agent would speak in Bangladesh Bengali.\n"
@@ -142,6 +151,11 @@ class BaseAgent(Agent):
                 "- Avoid reading lists or dictionaries verbatim - summarize and present information conversationally in natural Bengali.\n"
                 "- Use natural Bengali expressions: 'জি, অবশ্যই', 'আচ্ছা', 'ঠিক আছে', 'ধন্যবাদ' etc.\n"
                 "- Speak in short, clear sentences. Avoid very long or complex sentences.\n"
+                "- CRITICAL TTS FORMATTING: Never use hyphens (-) in speech - replace with spaces or remove them. "
+                "Example: Say 'o 302' or 'o302', NOT 'o-302'. Say 'user id', NOT 'user-id'.\n"
+                "- CRITICAL TTS FORMATTING: When numbers have dots (like '1.'), speak them as Bengali words, NOT as '1 dot'. "
+                "Example: Say 'এক' (one) or 'প্রথম' (first) for '1.', NOT '1 dot'. Say 'দুই' (two) for '2.', NOT '2 dot'.\n"
+                "- CRITICAL TTS FORMATTING: Always spell out numbers in Bengali: '1' = 'এক', '2' = 'দুই', '10' = 'দশ', '100' = 'একশ', '1000' = 'এক হাজার'.\n"
                 f"{thank_you_branding}"
                 f"{scope_limitation}"
             )
@@ -204,11 +218,11 @@ class BaseAgent(Agent):
             # GreeterAgent will use its own concise branding greeting with name
             if language == "bn-BD":
                 await self.session.generate_reply(
-                    instructions="Say concisely: 'স্বাগতম বাংলাদেশের নম্বর ওয়ান ই-কমার্স প্ল্যাটফর্ম কার্টআপে। আমি নাওমে, কার্টআপের গ্রীটার এজেন্ট। আমি আপনাকে কীভাবে সাহায্য করতে পারি?' Keep it short and to the point. No extra explanations."
+                    instructions="Say concisely: 'স্বাগতম বাংলাদেশের নম্বর ওয়ান ই-কমার্স প্ল্যাটফর্ম কার্টআপে। আমি নাওমি, কার্টআপের কাস্টমার অ্যাসিস্ট্যান্ট। আমি আপনাকে কীভাবে সাহায্য করতে পারি?' Keep it short and to the point. No extra explanations."
                 )
             else:
                 await self.session.generate_reply(
-                    instructions="Say concisely: 'Welcome to Bangladesh number one e-commerce platform CartUp. I'm Nawme, CartUp's greeter agent. How can I help you today?' Keep it short and to the point. No extra explanations."
+                    instructions="Say concisely: 'Welcome to Bangladesh number one e-commerce platform CartUp. I'm Nawme, CartUp's Customer Assistant. How can I help you today?' Keep it short and to the point. No extra explanations."
                 )
         else:
             # Default greeting for transferred agents (can be overridden)
@@ -233,4 +247,3 @@ class BaseAgent(Agent):
         
         # Announce transfer before handing off to the target agent.
         return next_agent, f"Transferring to {name}."
-
